@@ -1,0 +1,2368 @@
+/* =========================================
+   載入自訂字體 (LINE Seed TW)
+   ========================================= */
+@font-face {
+    font-family: 'LINE Seed TW';
+    src: url('fonts/LINESeedTW_TTF_Th.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'LINE Seed TW';
+    src: url('fonts/LINESeedTW_TTF_Rg.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'LINE Seed TW';
+    src: url('fonts/LINESeedTW_TTF_Bd.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'LINE Seed TW';
+    src: url('fonts/LINESeedTW_TTF_Eb.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+}
+
+/* =========================================
+   基礎重置 (Reset)
+   ========================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    cursor: url('PNG/cursor.png'), auto !important;
+}
+
+/* 全域套用 LINE Seed TW 字體 */
+body {
+    font-family: 'LINE Seed TW', sans-serif;
+}
+
+/* 封面區塊 (Hero Section) */
+.hero-section {
+    width: 100%;
+    height: 100vh; 
+    background-image: url('JPG/封面.jpg'); 
+    background-position: center; 
+    background-repeat: no-repeat; 
+    background-size: cover; 
+    position: relative; 
+    overflow: hidden;
+}
+
+.start-btn {
+    position: absolute;
+    bottom: 10%; 
+    left: 50%;
+    transform: translateX(-50%); 
+    width: 300px; 
+    max-width: 80%; 
+    cursor: pointer; 
+    transition: transform 0.3s ease; 
+}
+.start-btn:hover {
+    transform: translateX(-50%) scale(1.05); 
+}
+
+/* 兩隻手 */
+.hand {
+    position: absolute;
+    bottom: 20px; 
+    width: 2500px; 
+    max-width: 45%; 
+    transition: left 0.3s ease, right 0.3s ease; 
+}
+.left-hand { left: -250px; }
+.right-hand { right: -250px; }
+.hero-section:has(#startBtn:hover) .left-hand { left: -230px; }
+.hero-section:has(#startBtn:hover) .right-hand { right: -230px; }
+
+/* 標題旁的手掌 */
+.hand-palm {
+    position: absolute;
+    top: 13%;
+    left: 55%; 
+    width: 350px; 
+    max-width: 25%; 
+    transform-origin: bottom center; 
+    animation: wobble 2.5s ease-in-out infinite;
+    will-change: transform;
+}
+@keyframes wobble {
+    0%, 100% { transform: rotate(-8deg); }
+    50% { transform: rotate(8deg); }
+}
+
+/* =========================================
+   測驗頁面：左上角返回首頁按鈕
+   ========================================= */
+.back-home-btn {
+    position: fixed; /* 🎯 從 absolute 改為 fixed，確保永遠釘在視窗左上角 */
+    top: 40px;
+    left: 40px;
+    width: 65px; 
+    height: 65px;
+    z-index: 9999;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    transition: transform 0.3s ease; 
+}
+
+.back-home-btn img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transform: rotate(-90deg); /* 🎯 魔法在這裡：把往上的箭頭轉向左邊 */
+}
+
+/* 滑鼠移上去的互動動畫：微微往左浮動並放大 */
+.back-home-btn:hover {
+    transform: translateX(-10px) scale(1.05); 
+}
+
+/* 📱 手機版 RWD 微調 */
+@media (max-width: 768px) {
+    .back-home-btn {
+        top: 20px;
+        left: 20px;
+        width: 50px;
+        height: 50px;
+    }
+}
+/* 隱藏捲軸 */
+::-webkit-scrollbar { display: none; }
+html, body { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* 介紹頁面 */
+.intro-page { background-color: #00E1FF; }
+.intro-container { position: relative; width: 100%; }
+.intro-bg-img { width: 100%; display: block; }
+
+.next-btn {
+    position: absolute;
+    bottom: 5%; 
+    left: 50%;
+    transform: translateX(-50%); 
+    width: 330px; 
+    max-width: 80%; 
+    cursor: pointer; 
+    transition: transform 0.3s ease; 
+}
+.next-btn:hover {
+    transform: translateX(-50%) scale(1.05); 
+}
+
+/* 對話頁面 */
+.talk-page {
+    background-color: #F8F8F8;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+.dialog-container {
+    position: absolute;
+    bottom: 15%; 
+    left: 50%;
+    transform: translateX(-50%);
+    width: 85%; 
+    max-width: 1000px; 
+}
+
+.dialog-box {
+    position: relative;
+    background-color: #FFFFFF;
+    border: 3px solid #00EAFF; 
+    border-radius: 20px; 
+    padding: 60px 80px; 
+    box-shadow: none;
+}
+
+.dialog-text {
+    font-size: 1.6rem; 
+    font-weight: bold; 
+    color: #333333; 
+    line-height: 1.6;
+    margin: 0;
+    position: relative;
+    display: inline-block;
+}
+
+.dialog-text::after {
+    content: ''; 
+    position: absolute;
+    right: -10px; 
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px; 
+    height: 1.2em; 
+    background-color: #333333; 
+    animation: blink 1s infinite;
+}
+@keyframes blink {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+.next-dialog-btn {
+    position: absolute;
+    bottom: 25px;
+    right: 35px;
+    cursor: pointer;
+    animation: bounce 1.8s infinite ease-in-out;
+    height: auto;
+}
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(10px); } 
+}
+
+.next-btn-img {
+    width: 30px; 
+    height: auto; 
+    display: block; 
+}
+
+/* 基本資料覆蓋層 */
+.info-overlay {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); 
+    z-index: 100; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.info-card {
+    background-color: #FFFFFF;
+    border-radius: 20px;
+    padding: 60px 60px;
+    text-align: center;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); 
+}
+
+.info-title {
+    color: #4A4A4A;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    margin-top: 35px;
+    font-weight: bold;
+}
+.info-title:first-child { margin-top: 0; }
+
+.info-input {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #00EAFF; 
+    border-radius: 10px;
+    font-size: 1rem;
+    outline: none;
+    text-align: center; 
+    color: #00EAFF;
+    font-weight: bold;
+    font-family: inherit; /* 繼承 LINE Seed TW */
+}
+.info-input::placeholder { color: #D3D3D3; font-weight: normal; }
+
+.gender-selection {
+    display: flex;
+    justify-content: center;
+    gap: 30px; 
+    margin-bottom: 40px;
+}
+
+.gender-btn {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 2px solid #00EAFF;
+    background-color: transparent;
+    color: #00EAFF;
+    font-size: 1.5rem; 
+    font-weight: bold;
+    cursor: pointer;
+    font-family: inherit; /* 繼承 LINE Seed TW */
+}
+
+.gender-btn.active {
+    background-color: #00EAFF;
+    color: transparent; 
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 80%; 
+    transition: none; 
+}
+.gender-btn[data-gender="男"].active { background-image: url('PNG/男.png'); }
+.gender-btn[data-gender="女"].active { background-image: url('PNG/女.png'); }
+
+.gogo-btn {
+    background-color: #00EAFF;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 30px;
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    width: 80%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    font-family: inherit; /* 繼承 LINE Seed TW */
+}
+.gogo-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 234, 255, 0.6);
+}
+
+/* =========================================
+   測驗頁面共用設定 
+   ========================================= */
+.quiz-body {
+    background-color: #FFFFFF;
+    color: #333333;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; 
+}
+
+.stage {
+    width: 100%;
+    max-width: 1200px;
+    padding: 40px;
+    position: relative;
+    text-align: center;
+    animation: fadeIn 0.5s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: 100vh;
+}
+@keyframes fadeIn { 
+    from { opacity: 0; transform: translateY(10px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+.hidden { display: none !important; }
+
+.bg-video, .bg-img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;           
+    max-width: 900px;     
+    height: auto;         
+    max-height: 80vh;     
+    object-fit: contain;  
+    z-index: 0;           
+    pointer-events: none; 
+}
+
+/* 測驗進行中 */
+.quiz-header {
+    display: none !important;
+    text-align: center;
+    width: 100%;
+    max-width: 1000px;
+    margin-top: 40px; 
+    background: rgba(255, 255, 255, 0.9); 
+    padding: 30px;
+    border-radius: 20px;
+    backdrop-filter: blur(5px);
+    position: relative;
+    z-index: 2; 
+    box-shadow: none; 
+}
+
+.question-text {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #333;
+    margin-bottom: 10px;
+    line-height: 1.2;
+}
+
+.lead {
+    font-size: 1.4rem;
+    color: #555;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.options-grid {
+    display: flex;
+    flex-direction: column; 
+    gap: 15px; /* 按鈕之間的間距稍微縮小，看起來更緊湊 */
+    width: 90%;
+    max-width: 450px; /* 配合圖片比例，限制最大寬度讓按鈕不要太長 */
+    
+    /* 絕對定位：固定在畫面下方 */
+    position: absolute;
+    bottom: 8%; /* 距離底部的距離，如果覺得太高或太低可以改這裡 (例如 10% 或 5%) */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.option-card {
+    width: 100%;
+    cursor: pointer;
+}
+.option-card:hover { transform: scale(1.02); }
+.option-card:active { transform: scale(0.98); }
+
+.opt-pill-btn {
+    width: 100%;
+    padding: 16px 30px; /* 上下內距稍微調窄，讓按鈕看起來更修長 */
+    border: none; /* 移除原本的亮藍色邊框 */
+    border-radius: 50px; 
+    background-color: #F4F4F4; /* 圖片上的淺灰色底 */
+    
+    font-size: 1.1rem; /* 字體稍微縮小，符合圖片比例 */
+    font-weight: 700; /* 字體粗細 */
+    color: #4A4A4A; /* 深灰色字體 */
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    transition: all 0.3s ease; /* 讓變色跟縮放更平滑 */
+    
+    /* 加上非常淡的陰影，讓按鈕稍微浮出背景 */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); 
+}
+.option-card:hover .opt-pill-btn {
+    /* 移過去時，讓按鈕變成你們的品牌亮藍色，字變白色 */
+    background-color: #00EAFF; 
+    color: #FFFFFF; 
+    transform: scale(1.02); /* 微微放大 */
+    box-shadow: 0 6px 15px rgba(0, 234, 255, 0.3); /* 帶有藍色的發光陰影 */
+}
+
+/* 5. 點擊瞬間 (Active) 的回饋感 */
+.option-card:active .opt-pill-btn {
+    transform: scale(0.98); /* 微微縮小，模擬按壓感 */
+}
+
+/* 進度條 */
+.progress-bar { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 8px; 
+    background: rgba(0, 234, 255, 0.2); 
+    z-index: 9999; 
+}
+.progress-fill { 
+    height: 100%; 
+    background: #00EAFF; 
+    width: 0%; 
+    transition: width 0.4s ease-out; 
+}
+
+/* 過場情境頁面 */
+.rpg-stage { justify-content: flex-end; padding-bottom: 5%; }
+.rpg-box-container { position: relative; width: 90%; max-width: 1000px; z-index: 10; }
+.rpg-dialogue-box { 
+    background: #ffffff; 
+    border: 3px solid #00EAFF; 
+    border-radius: 20px; 
+    padding: 50px 70px; 
+    min-height: 150px; 
+    box-shadow: none; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: flex-start; 
+    align-items: flex-start;
+    cursor: pointer; 
+    position: relative; 
+}
+.rpg-text { color: #333; font-size: 2rem; font-weight: 700; line-height: 1.5; white-space: pre-wrap; text-align: left; }
+
+/* =========================================
+   新版測驗結果畫面 (Result Page) - 完美 1920x1080
+   ========================================= */
+.result-stage {
+    padding: 0; 
+    max-width: 100%;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #F8F8F8; 
+}
+
+/* 使用 aspect-ratio 確保在任何螢幕都保持 16:9，不變形不裁切 */
+.result-image-container {
+    position: relative;
+    width: 100vw;
+    max-width: calc(100vh * (1920 / 1080));
+    height: 100vh;
+    max-height: calc(100vw * (1080 / 1920));
+    background-color: #fff;
+    overflow: hidden;
+}
+
+/* 結果底圖設定 */
+.result-base-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain; 
+    z-index: 1;
+}
+.res-dynamic-video {
+    position: absolute;
+    z-index: 2;          /* 🎯 確保層級大於底圖的 1，這樣才會浮在上面 */
+    top: 53%;            /* 垂直置中 */
+    left: 30%;           /* 🎯 讓影片靠左側 (數值越小越靠左) */
+    transform: translate(-50%, -50%); 
+    width: 27%;          /* 🎯 影片的大小，可以根據你的視覺需求微調 */
+    height: auto;
+    object-fit: contain;
+    pointer-events: none; /* 讓滑鼠可以穿透影片，不會干擾其他點擊 */
+}
+/* 動態文字疊加設定 */
+.res-dynamic-text {
+    position: absolute;
+    z-index: 2;
+    top: 24%; 
+    left: 57.5%; 
+    transform: translate(-50%, -50%); 
+    
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #4A4A4A; 
+    margin: 0;
+    white-space: nowrap; 
+}
+
+#res-name {
+    font-size: 2.2rem;
+    color: #00EAFF; 
+    margin-right: 5px;
+    font-weight: 900;
+}
+
+/* 按鈕群組疊加設定 */
+.res-button-group {
+    position: absolute;
+    z-index: 2;
+    bottom: 30%; 
+    left: 57.5%; 
+    transform: translate(-50%, 50%); 
+    
+    display: flex;
+    gap: 20px; 
+}
+
+/* 共用按鈕樣式 */
+.res-btn {
+    padding: 15px 40px;
+    font-size: 1.6rem;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-family: inherit; /* 繼承 LINE Seed TW */
+}
+.res-btn:hover { transform: scale(1.05); }
+
+/* 重測按鈕 */
+.outline-btn {
+    background-color: #FFFFFF;
+    color: #00EAFF;
+    border: 3px solid #00EAFF;
+}
+
+/* 拍貼按鈕 */
+.solid-btn {
+    background-color: #00EAFF;
+    color: #FFFFFF;
+    border: 3px solid #00EAFF;
+    box-shadow: 0 5px 15px rgba(0, 234, 255, 0.4);
+}
+
+/* 螢幕較小時自動縮小文字與按鈕 */
+@media (max-width: 768px) {
+    .res-dynamic-text { font-size: 1.2rem; }
+    #res-name { font-size: 1.5rem; }
+    .res-btn { padding: 10px 25px; font-size: 1.2rem; }
+    .res-button-group { gap: 10px; }
+}
+
+/* =========================================
+   拍貼機頁面 (Photobooth)
+   ========================================= */
+.booth-page {
+    background-color: #000000;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+/* 視訊鏡頭全螢幕滿版顯示 */
+#webcam-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    transform: scaleX(-1); 
+    z-index: 1;
+}
+
+.booth-ui-layer {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* 背景變暗暗的覆蓋層 */
+.booth-modal-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: auto;
+    transition: opacity 0.5s ease;
+}
+
+.booth-modal-content {
+    position: relative;
+    width: 90%;
+    max-width: 800px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-bg-img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 互動掃描框定位 */
+.interactive-area {
+    position: absolute;
+    top: 50%; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* =========================================
+   全新掃描框動畫與外觀 (完美還原設計圖)
+   ========================================= */
+.scanner-box {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.scanner-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+}
+
+/* 四個框角的共用設定 */
+.corner-brackets {
+    transition: stroke 0.3s ease, opacity 0.3s ease;
+}
+
+/* 方形進度條的共用設定 */
+.progress-ring-rect {
+    stroke-dasharray: 526; 
+    stroke-dashoffset: 526; 
+    transition: stroke-dashoffset 0.1s linear, opacity 0.3s ease;
+    opacity: 0;
+}
+
+/* --- 狀態 1：沒有手 (白框角) --- */
+.state-no-hand .corner-brackets {
+    stroke: #FFFFFF;
+    opacity: 1;
+}
+.state-no-hand .progress-ring-rect { opacity: 0; }
+
+/* --- 狀態 2：有手沒揮 (藍框角) --- */
+.state-hand-detected .corner-brackets {
+    stroke: #00EAFF;
+    opacity: 1;
+}
+.state-hand-detected .progress-ring-rect { opacity: 0; }
+
+/* --- 狀態 3：揮手中 (隱藏框角，顯示連續藍線) --- */
+.state-waving .corner-brackets {
+    opacity: 0; 
+}
+.state-waving .progress-ring-rect {
+    opacity: 1; 
+}
+
+/* 手掌圖示的顯示邏輯 */
+.wobble-hand-icon {
+    width: 70px;
+    height: auto;
+    transition: opacity 0.3s ease;
+    transform-origin: bottom center;
+    z-index: 2;
+}
+
+.state-no-hand .wobble-hand-icon { opacity: 0.5; }
+.state-hand-detected .wobble-hand-icon { opacity: 1; }
+.state-waving .wobble-hand-icon {
+    opacity: 1;
+    animation: wobble 2s ease-in-out infinite;
+}
+
+/* 文字狀態設定 */
+.status-text {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #FFFFFF; 
+    margin: 0;
+    letter-spacing: 2px;
+}
+
+/* =========================================
+   教學與拍照階段 UI
+   ========================================= */
+.teaching-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; 
+}
+
+/* 左側教學動畫 (WebM) */
+.tutorial-video {
+    position: absolute;
+    top: 56%;
+    left: -8%; 
+    transform: translateY(-50%);
+    height: 125vh; 
+    width: auto;
+    z-index: 5;
+}
+
+
+    
+
+/* 白框狀態 (找手中) */
+.tracker-white { color: #FFFFFF; transform: translate(-50%, -50%) scale(1); }
+/* 藍框狀態 (已鎖定手部) */
+.tracker-blue { color: #00EAFF; transform: translate(-50%, -50%) scale(0.9); }
+
+/* =========================================
+   角色名稱 (動態文字大小與排版)
+   ========================================= */
+.role-display-text {
+    position: absolute;
+    bottom: 20%;
+    left: 65%;
+    transform: translateX(-50%);
+    font-weight: 900;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.5); 
+    letter-spacing: 5px;
+    margin: 0;
+    z-index: 10;
+    display: flex;
+    gap: 20px; 
+    align-items: baseline; 
+}
+
+/* 預設狀態 (還沒輪到它時：灰色、較小) */
+.role-display-text span {
+    font-size: 1.5rem; 
+    color: #AAAAAA;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+}
+
+/* 啟動狀態 (現在正在比這個詞：藍色、變大) */
+.role-display-text span.active-text {
+    font-size: 2.5rem; 
+    color: #00EAFF;
+}
+
+/* 下方提示藥丸 (固定長度居中) */
+.hint-pill {
+    position: absolute;
+    bottom: 8%; 
+    left: 50%; 
+    transform: translateX(-50%);
+    background-color: #FFFFFF;
+    color: #333333;
+    font-size: 1.5rem;
+    font-weight: 800;
+    padding: 15px 20px;
+    width: 600px; 
+    max-width: 90%; 
+    text-align: center; 
+    border-radius: 50px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    z-index: 10;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* =========================================
+   多重指定框與錄影 UI
+   ========================================= */
+.target-box {
+    position: absolute;
+    transform: translate(-50%, -50%) scale(1);
+    width: 220px; 
+    height: 220px;
+    z-index: 10;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.box-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+}
+
+.target-corner {
+    stroke: #FFFFFF;
+    transition: stroke 0.3s ease, opacity 0.3s ease;
+}
+
+.target-box.active-blue {
+    transform: translate(-50%, -50%) scale(0.85);
+}
+.target-box.active-blue .target-corner {
+    stroke: #00EAFF;
+}
+
+.target-progress {
+    stroke: #00EAFF;
+    stroke-dasharray: 766; 
+    stroke-dashoffset: 766; 
+    opacity: 0;
+    transition: stroke-dashoffset 0.1s linear, opacity 0.3s ease;
+}
+
+/* 移除實心變色，讓框框在鎖定後直接準備倒數 */
+.target-box.verified {
+    transform: translate(-50%, -50%) scale(0.85); 
+}
+
+.target-box.verified .target-corner {
+    stroke: #00EAFF; /* 保持藍色，但不消失 */
+    opacity: 1; 
+}
+
+/* 方形進度條只在真正錄影倒數時出現 */
+.target-box.verified .target-progress {
+    opacity: 1; 
+}
+
+.target-box.counting-down .target-progress {
+    transition: stroke-dashoffset 3s linear !important;
+    stroke-dashoffset: 766 !important;
+}
+
+.box-countdown-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 6rem;
+    font-weight: 900;
+    color: #00EAFF;
+    display: none;
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+}
+
+.rec-indicator {
+    position: absolute;
+    top: 5%; right: 5%;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #FF3B30;
+    letter-spacing: 2px;
+    z-index: 50;
+    display: none; 
+    align-items: center;
+    gap: 15px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.rec-dot {
+    width: 25px; height: 25px;
+    background-color: #FF3B30;
+    border-radius: 50%;
+    animation: recBlink 1s infinite;
+}
+
+@keyframes recBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.recording-mode .role-display-text,
+.recording-mode .hint-pill {
+    display: none !important;
+}
+/* =========================================
+   拍貼預覽階段 UI (Canvas 合成版)
+   ========================================= */
+.preview-stage {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: #F8F8F8; 
+    z-index: 100; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.preview-image-container {
+    position: relative;
+    width: 100vw;
+    max-width: calc(100vh * (1920 / 1080));
+    height: 100vh;
+    max-height: calc(100vw * (1080 / 1920));
+    background-color: #fff;
+    overflow: hidden;
+}
+
+.preview-base-img {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: contain; 
+    z-index: 1;
+}
+
+/* --- 放置 Canvas 的容器 --- */
+.video-group-container {
+    position: absolute;
+    z-index: 2;
+    
+    /* 🎯 【終極解法】：用 width 控制大小，height 設為 auto，絕對不會被壓縮！ */
+    width: 16.5%;           /* 💡 只要調整這個數字，就能放大或縮小整個模板 */
+    height: auto;         /* 讓高度自己去算，保證不變形 */
+  
+    /* 🎯 微調位置：請根據底圖調整，把它推到藍色框框上 */
+    top: 17%;      
+    left: 12.8%;      
+}
+
+/* 合成好的最終畫布 */
+.final-canvas {
+    width: 100%;
+    height: auto;    /* 🎯 讓畫布依照內部 1080x1920 的真實比例顯示，拒絕壓扁！ */
+    display: block;
+}
+
+/* --- QR Code --- */
+.preview-qr-img {
+    position: absolute;
+    z-index: 2;
+    top: 32%; 
+    right: 22%; 
+    width: 15%; 
+    aspect-ratio: 1 / 1; 
+}
+.preview-qr-img img { width: 100%; height: 100%; object-fit: contain; }
+
+/* --- 按鈕群組 --- */
+.preview-btn-group {
+    position: absolute;
+    z-index: 2;
+    bottom: 20%; 
+    right: 12%; 
+    display: flex;
+    gap: 20px; 
+}
+
+/* =========================================
+   首頁 (Home Page)
+   ========================================= */
+/* 讓點擊箭頭往下時，畫面會有平滑滾動的效果 */
+html {
+    scroll-behavior: smooth; 
+}
+
+.home-page {
+    background-color: #F8F8F8; /* 配合你們整體的淺色背景 */
+}
+
+/* 滿版背景圖區塊 */
+.home-hero {
+    width: 100%;
+    height: 100vh; /* 確保高度剛好等於一個螢幕高 */
+    background-image: url('JPG/首頁圖.jpg'); /* 讀取 JPG 檔案夾中的底圖 */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover; /* 讓圖片填滿整個螢幕 */
+    position: relative;
+    overflow: hidden;
+}
+/* =========================================
+   浮動 LOGO (左上角)
+   ========================================= */
+.floating-logo {
+    position: fixed;
+    top: 40px; /* 🎯 跟導覽列保持相同的高度 */
+    left: 40px; /* 🎯 距離左邊緣的距離 */
+    width: 180px; /* 🎯 LOGO 的寬度，你可以依據視覺喜好微調數字 */
+    z-index: 9999; /* 跟導覽列一樣高的層級 */
+    transition: transform 0.4s ease, opacity 0.4s ease; /* 隱藏時的平滑動畫 */
+}
+
+.floating-logo img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 🎯 當進入圖標總覽時，用來隱藏 LOGO 的 class */
+.floating-logo.hidden {
+    transform: translateY(-150%); /* 往上縮回畫面外 */
+    opacity: 0;
+    pointer-events: none; /* 隱藏時不可點擊 */
+}
+
+/* 📱 手機版 RWD 微調 (讓 LOGO 在手機上小一點，或調整距離) */
+@media (max-width: 768px) {
+    .floating-logo {
+        top: 20px;
+        left: 20px;
+        width: 120px;
+    }
+}
+/* --- 頂部導覽列 (Bar) --- */
+/* --- 頂部導覽列 (Bar) --- */
+.navbar {
+    position: fixed; /* 🎯 從 absolute 改成 fixed，讓它跟著畫面走 */
+    top: 40px; 
+    left: 50%;
+    transform: translateX(-50%); 
+    
+    background-color: rgba(255, 255, 255, 0.95); 
+    border-radius: 50px; 
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); 
+    z-index: 9999; /* 🎯 調高層級，確保它不會被後面的區塊蓋住 */
+    transition: transform 0.4s ease, opacity 0.4s ease; /* 🎯 加上平滑過場動畫 */
+}
+
+/* 🎯 新增：當滑到圖標總覽時，用來隱藏導覽列的專屬 class */
+.navbar.navbar-hidden {
+    transform: translate(-50%, -150%); /* 往上縮回畫面外 */
+    opacity: 0;
+    pointer-events: none; /* 隱藏時不可點擊 */
+}
+
+.nav-item {
+    text-decoration: none;
+    color: #4A4A4A; /* 深灰色字體 */
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 10px 25px;
+    border-radius: 40px;
+    transition: all 0.3s ease;
+    font-family: inherit; /* 繼承 LINE Seed TW */
+}
+
+/* 目前所在頁面的狀態 (使用你們的專屬亮藍色) */
+.nav-item.active {
+    background-color: #00EAFF; 
+    color: #FFFFFF;
+}
+
+.nav-item:hover:not(.active) {
+    background-color: #F0F0F0; /* 滑鼠移過去時的淺灰底色 */
+}
+
+/* --- 下拉選單容器 --- */
+.nav-item.dropdown {
+    position: relative;
+    cursor: pointer;
+    display: inline-block;
+}
+
+/* 讓滑鼠移入時顯示選單 */
+.nav-item.dropdown:hover .dropdown-content {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* --- 下拉選單內容外框 --- */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%; /* 出現在「手語專欄」下方 */
+    left: 50%;
+    transform: translateX(-50%) translateY(10px); /* 稍微位移增加動感 */
+    background-color: rgba(255, 255, 255, 0.98);
+    min-width: 140px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    overflow: hidden;
+    z-index: 10000;
+    padding: 10px 0;
+    transition: all 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* --- 下拉選單內的選項 --- */
+.dropdown-content a {
+    color: #4A4A4A;
+    padding: 12px 20px;
+    text-decoration: none;
+    display: block;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.2s, color 0.2s;
+    text-align: center;
+}
+
+/* 選項 Hover 效果 */
+.dropdown-content a:hover {
+    background-color: #F0F0F0;
+    color: #00EAFF;
+}
+
+/* 移除 span 可能產生的預設間距 */
+.dropdown-title {
+    display: inline-block;
+}
+/* --- 底部向下箭頭 --- */
+.scroll-down-container {
+    position: absolute;
+    bottom: 30px; /* 距離底部的距離 */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    text-align: center;
+}
+
+.scroll-arrow {
+    width: 45px; /* ⚠️ 請根據你實際輸出的箭頭 PNG 大小來調整這個數字 */
+    height: auto;
+    cursor: pointer;
+    animation: floatUpDown 1.5s ease-in-out infinite; /* 套用上下浮動動畫 */
+}
+
+/* 箭頭上下浮動的動畫效果 */
+@keyframes floatUpDown {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(15px); }
+}
+
+/* --- 預留的下方動畫區塊 --- */
+.animation-section {
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
+}
+/* =========================================
+   什麼是動字動字 (旗艦級：滾輪連動動畫)
+   ========================================= */
+
+/* 🚨 1. 確保只有這一個 .what-is-section，且絕對不能有 overflow: hidden; */
+.what-is-section {
+    width: 100%;
+    height: 200vh; 
+    background-image: url('JPG/什麼是動字動字_背景.jpg'); 
+    background-position: top center;
+    background-repeat: no-repeat;
+    background-size: 100% auto; 
+    position: relative;
+}
+
+.signs-wrapper {
+    position: sticky;
+    top: 0;
+    width: 100%;
+ 
+    height: 100vh; 
+
+    overflow: hidden; /* 這個屬性只能加在這裡，用來裁切突出去的牌子 */
+}
+
+/* 牌子共用設定：中心點對齊 */
+.sign-item {
+    position: absolute;
+    transform: translate(-50%, -50%); 
+    z-index: 10;
+}
+
+/* =========================================
+   動畫軌跡計算 (強制修復版)
+   ========================================= */
+
+.sign-triangle {
+    /* 橫向：從 15% 飛到 50% */
+    left: calc(35% + (15.5% * var(--p, 0))) !important; 
+    /* 直向：從 20vh 降落到 50vh */
+    top: calc(40vh + (20vh * var(--p, 0))) !important;
+    /* 尺寸：從 400px 變為 250px */
+    width: calc(450px - (250px * var(--p, 0))) !important; 
+    display: block !important;
+}
+
+.sign-hand {
+    left: calc(60% - (9% * var(--p, 0))) !important;
+    top: calc(75vh + (1vh * var(--p, 0))) !important;
+    width: calc(720px - (360px * var(--p, 0))) !important;
+}
+
+/* =========================================
+   背景雲朵視差特效 (獨立運作，絕對不影響牌子)
+   ========================================= */
+
+.cloud-item {
+    position: absolute;
+    z-index: 1; /* 確保在牌子之下 */
+    pointer-events: none; /* 讓滑鼠可以穿透雲朵，不影響任何操作 */
+    
+    /* 🌟 雲朵視差核心公式：利用 --speed 決定移動幅度 */
+    transform: translate(-50%, calc(-50% + (var(--speed, -20vh) * var(--p, 0))));
+}
+
+/* 📌 雲朵 01：不改變原始圖片大小 (維持原尺寸) */
+.cloud-01 {
+    /* 這裡刻意不寫 width，讓它保持原圖的自然大小 */
+}
+
+/* 📌 雲朵 02：允許隨意改變大小的基礎設定 */
+.cloud-02 {
+    /* 可以在下方個別調整 width */
+}
+
+/* =========================================
+   個別雲朵設定 (位置、大小、飄動速度)
+   💡 --speed 為「負數」代表往下滾動時，雲會往上飄（產生背景較遠的錯覺）
+   ========================================= */
+
+/* A: 左上方的 01 雲 (🚨 加上 width，不讓它變巨無霸) */
+.cloud-a { left: 15%; top: 20vh; width: 450px; --speed: -30vh; } 
+
+/* B: 右上方的 02 雲 (20px 太小了，改成 250px) */
+.cloud-b { left: 85%; top: 30vh; width: 250px; --speed: -15vh; } 
+
+/* C: 左下方的 02 雲 (設定大一點 350px，飄非常快) */
+.cloud-c { left: 10%; top: 75vh; width: 350px; --speed: -45vh; } 
+
+/* D: 右下方的 02 雲 (改成 200px) */
+.cloud-d { left: 80%; top: 85vh; width: 200px; --speed: -25vh; }
+
+/* E: 畫面偏中間的 01 雲 (🚨 加上 width 限制) */
+.cloud-e { left: 35%; top: 100vh; width: 500px; --speed: -50vh; }
+
+/* =========================================
+   讓手語成為日常的風景 (第四區域：全螢幕背景)
+   ========================================= */
+.daily-scenery-section {
+    width: 100%;
+    height: 100vh; /* 🎯 滿版全螢幕高 */
+    
+    /* 載入你的背景圖，請確認檔名一字不差 */
+    background-image: url('JPG/讓手語成為日常的風景_背景.jpg'); 
+    background-position: center center; /* 讓圖片永遠保持正中心對齊 */
+    background-repeat: no-repeat;
+    background-size: cover; /* 像桌布一樣完美填滿整個外框 */
+    
+    position: relative; /* 預留給你未來如果想在照片上加字或按鈕用的空間 */
+}
+
+/* =========================================
+   專案客群與需求 (第五區域：全螢幕背景)
+   ========================================= */
+.target-audience-section {
+    width: 100%;
+    height: 100vh; /* 滿版全螢幕高 */
+    
+    /* 載入你的背景圖，請確認檔名一字不差 */
+    background-image: url('JPG/客群_背景.jpg'); 
+    background-position: center center; /* 保持正中心對齊 */
+    background-repeat: no-repeat;
+    background-size: cover; /* 完美填滿螢幕 */
+    
+    position: relative; 
+}
+
+/* =========================================
+   第五區域：影片與手部疊加設定
+   ========================================= */
+
+/* 1. 外層容器：負責置中與控制整體大小 */
+.audience-media-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* 完美對齊正中央 */
+    
+    width: 60%; /* 依據你的視覺需求調整大小 */
+    max-width: 800px;
+    
+    /* 讓這個容器成為內部元素的定位基準點 */
+    position: relative; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 2. 底層的動畫影片 */
+.audience-video {
+    width: 100%; /* 填滿外層容器 */
+    height: auto;
+    pointer-events: none; /* 讓滑鼠穿透 */
+}
+
+/* 3. 上層的手部 PNG 圖片 */
+.audience-hands-overlay {
+    position: absolute;
+    top: 31%;
+    left: 36%;
+    width: 28%; /* 大小完全跟隨影片 */
+    height: 28%;
+    object-fit: contain; /* 確保比例不變形 */
+    z-index: 2; /* 確保它蓋在影片的上面 */
+    pointer-events: none; 
+}
+/* =========================================
+   第六區域：放大鏡透視互動區
+   ========================================= */
+.why-learn-section {
+    width: 100%;
+    height: 100vh;
+    background-color: #F8F8F8; /* 可以改成你要的底色 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+   cursor: none !important; /* 可以順手幫它加上 !important */
+}
+
+/* 🎯 請把這三行加在這裡：強制裡面「所有的子元素(*)」都隱藏鼠標 */
+.why-learn-section * {
+    cursor: none !important;
+}
+
+.glass-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 雙層文字的共用設定 */
+.text-layer {
+    position: absolute;
+    text-align: center;
+    pointer-events: none; /* 讓滑鼠穿透文字，才不會卡住特效 */
+}
+/* 文字的字體大小與排版 */
+.text-layer h1 {
+    font-size: 8rem; 
+    font-weight: 700; /* 🎯 換成 LINE Seed Bold */
+    color: #4A4A4A;   /* 🎯 配合你的設計圖，換成深灰色 */
+    line-height: 1.5;
+    letter-spacing: 5px;
+    margin: 0;
+    text-align: left; /* 🎯 改為靠左對齊，方便做錯位排版 */
+    padding: 50px;
+}
+
+/* 🎯 第一行文字：原位不動 */
+.text-line-1 {
+    display: block;
+}
+
+/* 🎯 第二行文字：往右推，形成階梯狀 */
+.text-line-2 {
+    display: block;
+    margin-left: 200px; 
+}
+
+/* 📍 底層：模糊特效 */
+.text-blurred {
+    filter: blur(15px); 
+    opacity: 0.6; 
+    
+    /* 🎯 消除陰影的魔法：這是一個「反向遮罩」 */
+    /* 讓放大鏡照到的地方，底下的模糊文字會被挖出一個乾淨的圓洞，就不會有陰影透出來了！ */
+    --x: 50%;
+    --y: 50%;
+    --mask-size: 160px; 
+    -webkit-mask-image: radial-gradient(circle at var(--x) var(--y), transparent calc(var(--mask-size) - 10px), black var(--mask-size));
+    mask-image: radial-gradient(circle at var(--x) var(--y), transparent calc(var(--mask-size) - 10px), black var(--mask-size));
+}
+
+/* ...中間保留你原本的 .text-clear 跟 .magnifying-glass ... */
+
+/* 📱 手機版縮小字體與遮罩 */
+@media (max-width: 768px) {
+    .text-layer h1 { font-size: 4rem; }
+    .text-line-2 { margin-left: 80px; } /* 🎯 手機版往右推少一點 */
+    .magnifying-glass { width: 250px; }
+    .text-clear { --mask-size: 90px; }
+    .text-blurred { --mask-size: 90px; } /* 🎯 確保模糊層的挖洞大小同步縮小 */
+}
+
+/* 📍 表層：清晰文字與圓形遮罩 */
+.text-clear {
+    /* 預設把遮罩放在正中央 */
+    --x: 50%;
+    --y: 50%;
+    --mask-size: 160px; /* 🎯 這是「清晰範圍」的半徑大小，請根據你的放大鏡微調 */
+
+    /* 魔法核心：只顯示 (x,y) 座標周圍的圓形區域，其他全部隱藏 */
+    -webkit-mask-image: radial-gradient(circle at var(--x) var(--y), black calc(var(--mask-size) - 10px), transparent var(--mask-size));
+    mask-image: radial-gradient(circle at var(--x) var(--y), black calc(var(--mask-size) - 10px), transparent var(--mask-size));
+}
+
+/* 📍 放大鏡圖片本身 */
+.magnifying-glass {
+    position: absolute;
+    /* 預設跟隨剛才的 x, y 座標 */
+    left: var(--x, 50%);
+    top: var(--y, 50%);
+    
+    /* 🎯 如果你的放大鏡鏡片不是在圖片正中央，可以微調這兩個 -50% (例如 -40%, -40%) 來對齊 */
+    transform: translate(52%, 28%); 
+    
+    width: 450px; /* 🎯 請根據 PNG 實際大小微調 */
+    height: auto;
+    pointer-events: none; 
+    z-index: 10;
+
+}
+
+/* 📱 手機版縮小字體與遮罩 */
+@media (max-width: 768px) {
+    .text-layer h1 { font-size: 4rem; }
+    .magnifying-glass { width: 250px; }
+    .text-clear { --mask-size: 90px; }
+}
+/* =========================================
+   第七區域：台灣手語現況 (旗艦級：自然滾動卡片)
+   ========================================= */
+.current-status-section {
+    width: 100%;
+    height: 400vh; /* 🎯 保留三個螢幕高，提供足夠的滾動空間 */
+    position: relative;
+}
+
+.status-sticky-container {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    background-image: url('JPG/台灣手語現況_背景.jpg');
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    overflow: hidden; /* 隱藏跑出畫面外的卡片 */
+}
+
+/* 疊加在藍色板子上的動畫影片 */
+.status-video {
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-width: 2000px;
+    height: auto;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* 存放卡片的容器 */
+.status-cards-wrapper {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 10; /* 確保蓋在影片上面 */
+    pointer-events: none;
+}
+
+/* 5張卡片的共用設定 */
+.status-card {
+    position: absolute;
+    left: 50%;
+    width: 400px; /* 🎯 大小 */
+    height: auto;
+    filter: drop-shadow(-5px 15px 15px rgba(0, 0, 0, 0.15));
+    transform-origin: bottom center; 
+}
+/* =========================================
+   🎯 疊放順序：
+   04 疊在 01,02,03 上面；05 疊在所有人上面
+   ========================================= */
+.card-1 { z-index: 10; }
+.card-2 { z-index: 20; }
+.card-3 { z-index: 30; }
+.card-4 { z-index: 40; } 
+.card-5 { z-index: 50; } 
+
+/* =========================================
+   🎯 完美保留你的定位 + 慢速大間距滾動公式
+   ========================================= */
+.card-1 {
+    transform: translate(-90%, -50%) translate(-340px, 0) rotate(-20deg);
+    top: calc(40% + max(20px, 120vh - (400vh * var(--p2, 0))));
+}
+.card-2 {
+    transform: translate(-70%, -50%) translate(-170px, 0) rotate(-8deg);
+    /* 增加 60vh 間距 */
+    top: calc(65% + max(10px, 180vh - (400vh * var(--p2, 0))));
+}
+.card-3 {
+    transform: translate(-50%, -50%) translate(0px, 0) rotate(0deg);
+    /* 增加 60vh 間距 */
+    top: calc(55% + max(-20px, 240vh - (400vh * var(--p2, 0))));
+}
+.card-4 {
+    transform: translate(-30%, -50%) translate(170px, 0) rotate(8deg);
+    /* 增加 60vh 間距 */
+    top: calc(65% + max(10px, 300vh - (400vh * var(--p2, 0))));
+}
+.card-5 {
+    transform: translate(-10%, -50%) translate(340px, 0) rotate(16deg);
+    /* 增加 60vh 間距 */
+    top: calc(40% + max(40px, 360vh - (400vh * var(--p2, 0))));
+}
+
+/* 手機版微調 */
+@media (max-width: 768px) {
+    .status-card { width: 140px; }
+    .card-1 { transform: translate(-50%, -50%) translate(-130px, 0) rotate(-16deg); }
+    .card-2 { transform: translate(-50%, -50%) translate(-65px, 0) rotate(-8deg); }
+    .card-3 { transform: translate(-50%, -50%) translate(0px, 0) rotate(0deg); }
+    .card-4 { transform: translate(-50%, -50%) translate(65px, 0) rotate(8deg); }
+    .card-5 { transform: translate(-50%, -50%) translate(130px, 0) rotate(16deg); }
+}
+
+/* =========================================
+   第八區域：學習手語我們可以... (滾輪切換區塊)
+   ========================================= */
+.learn-sign-section {
+    width: 100%;
+    height: 400vh; /* 🎯 給予足夠的滾動長度 */
+    position: relative;
+}
+
+.learn-sticky-container {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    background-image: url('JPG/學習手語_背景.jpg'); 
+    background-position: center center; 
+    background-repeat: no-repeat;
+    background-size: cover; 
+    
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12%; 
+    overflow: hidden;
+}
+
+/* --- 左側文字區塊 --- */
+.learn-text-content {
+    width: 35%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 100px; /* 🎯 往下推，避開你背景圖上的標題文字 */
+    padding-left: 250px;
+}
+
+.learn-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 45px; /* 選項之間的間距 */
+}
+
+/* 單一選項預設樣式 */
+.learn-item {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: #4A4A4A;
+    position: relative;
+    transition: all 0.4s ease;
+    cursor: default;
+}
+
+/* 🎯 使用你上傳的專屬箭頭 PNG */
+.learn-item::before {
+    content: '';
+    position: absolute;
+    left: -140px; /* 箭頭位置 */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 120px;  
+    height: 40px;  
+    background-image: url('PNG/學習手語_箭頭.png'); /* 載入專屬圖片 */
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center right;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+/* 🎯 隱藏預設箭頭 */
+.learn-item::after { display: none !important; }
+
+/* 🎯 Active 啟動狀態：文字變色、往右推、顯示箭頭 */
+.learn-item.active {
+    color: #00EAFF;
+    transform: translateX(120px); /* 往右推讓出空間 */
+}
+.learn-item.active::before {
+    opacity: 1; /* 顯示箭頭 */
+}
+
+/* --- 右側影片區塊 --- */
+.learn-video-content {
+    width: 45%;
+    height: 70%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 100px; /* 稍微往下對齊 */
+}
+
+/* 影片預設隱藏 (淡出) */
+.learn-video {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 0.6s ease-in-out, transform 0.6s ease;
+    pointer-events: none;
+    transform: scale(0.95); 
+}
+
+/* 影片啟動狀態 (淡入) */
+.learn-video.active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* 📱 手機版 RWD 調整 */
+@media (max-width: 900px) {
+    .learn-sticky-container { flex-direction: column; padding: 10% 5%; justify-content: center; }
+    .learn-text-content, .learn-video-content { width: 100%; margin-top: 30px; }
+    .learn-item { font-size: 1.3rem; }
+    .learn-item.active { transform: translateX(80px); }
+    .learn-item::before { width: 70px; left: -85px; }
+}
+/* =========================================
+   第九區域：動字動字做了甚麼 (跨雙區域垂直軸線)
+   ========================================= */
+.what-we-did-section {
+    width: 100%;
+    height: 200vh; /* 🎯 設定為兩個螢幕高，讓它橫跨兩個區域 */
+    
+    /* 載入你的背景圖 */
+    background-image: url('JPG/動字動字做了甚麼_背景.jpg'); 
+    background-position: top center; /* 讓圖片從最上面開始對齊 */
+    background-repeat: no-repeat;
+    background-size: 100% auto; /* 寬度 100% 填滿，高度讓它自然延伸 */
+    
+    position: relative; 
+}
+
+/* 📱 手機版 RWD 微調 (避免手機螢幕太窄導致圖片高度不夠 200vh) */
+@media (max-width: 768px) {
+    .what-we-did-section {
+        background-size: cover; 
+    }
+}
+
+/* =========================================
+   整合軌道 (退回最穩定的 100vw / 200vw 比例)
+   ========================================= */
+#horizontal-track-wrapper {
+    width: 100vw; /* 🎯 退回 100vw */
+    overflow: hidden; 
+}
+
+#horizontal-track {
+    display: flex;
+    align-items: flex-start; 
+    width: 200vw; /* 🎯 退回 200vw */
+    will-change: transform;
+}
+
+/* =========================================
+   第九區域：動字動字做了甚麼 (維持垂直 200vh)
+   ========================================= */
+.what-we-did-section {
+    width: 100vw; /* 🎯 退回 100vw */
+    height: 200vh; 
+    background-image: url('JPG/動字動字做了甚麼_背景.jpg');
+    background-position: top center;
+    background-repeat: no-repeat;
+    background-size: 100% auto;
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* 觸發 GSAP 橫移的隱形感測點 */
+#pan-trigger {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh; 
+    pointer-events: none;
+}
+
+/* --- 影片框框定位 --- */
+.media-box {
+    position: absolute;
+    width: 350px; 
+    height: auto;
+
+    overflow: hidden; 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); 
+}
+.media-box video, .media-box img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.box-1 { top: 26%; right: 10%; }
+.box-2 { top: 54%; left: 7%; }
+.box-3 { top: 77%; right: 12%; }
+
+/* =========================================
+   第十區域：圖標總覽與垂直內容
+   ========================================= */
+.icon-overview-section {
+    width: 100vw; /* 🎯 退回 100vw */
+    min-height: 100vh;
+    margin-top: 100vh; 
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: #F8F8F8;
+}
+/* --- 網格佈局設計 (100vh 高) --- */
+.cyan-grid-panel {
+    width: 100vw;
+    height: 100vh; 
+    background-color: #00EAFF;
+    padding: 4vh 3vw; /* 🎯 使用相對螢幕的邊距，視覺更和諧 */
+    display: flex;
+}
+
+.cyan-grid-container { 
+    width: 100%; 
+    height: 100%; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 3vh; 
+}
+
+/* 🎯 關鍵修復：強制給定精準的高度 %，解決灰色框框被擠扁的 Bug */
+/* 🎯 上半部：嚴格雙框比例 (55% : 45%) */
+.grid-top { 
+    height: 58%; 
+    width: 100%;
+    display: flex; 
+    gap: 2vw; 
+}
+
+/* 左邊影片框 */
+.top-left-box { 
+    width: 65%; 
+    height: 100%;
+    background-color: #FFFFFF; 
+    border-radius: 20px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* 右邊說明圖框 */
+.top-right-box { 
+    width: 35%; 
+    height: 100%;
+    background-color: #FFFFFF; 
+    border-radius: 20px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    padding: 0; /* 確保沒有多餘留白 */
+}
+
+/* 確保說明圖滿版貼齊 */
+#desc-img {
+    width: 100%; 
+    height: 100%; 
+    object-fit: contain; 
+    border: none;
+    box-shadow: none;
+    outline: none;
+}
+
+.grid-bottom { 
+    height: 42%; 
+    width: 100%;
+    display: flex; 
+}
+.bottom-box { 
+    width: 100%;
+    height: 100%;
+    background-color: #F4F4F4; 
+    border-radius: 20px; 
+}
+
+
+/* =========================================
+   第十區域：網格內部內容排版 (放大圖標 + 橫滑)
+   ========================================= */
+
+/* --- 左上角：影片展示區 --- */
+.top-left-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+#main-webm {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+    transition: opacity 0.2s ease-in-out;
+}
+/* --- 右上角：說明圖展示區 --- */
+.top-right-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background-color: #FFFFFF; /* 確保底色是乾淨的白色 */
+    padding: 0; /* 🎯 確保沒有多餘的留白 */
+}
+
+#desc-img {
+    width: 100%; /* 🎯 改為 100% 滿版，直接貼齊外框 */
+    height: 100%; /* 🎯 改為 100% 滿版 */
+    object-fit: contain; /* 確保你的說明圖完整顯示不被裁切 */
+    border: none;
+    box-shadow: none;
+    outline: none; /* 確保絕對沒有多餘的線條 */
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* --- 下半部：圖標選單區 --- */
+.bottom-box {
+    overflow-x: auto; 
+    overflow-y: hidden;
+    padding: 3vh 3vw;
+    display: flex;
+    align-items: flex-start; /* 🎯 靠上對齊，讓圖標順利展開 */
+    gap: 4vw; /* 類別之間的間距 */
+    scroll-behavior: smooth;
+}
+
+/* 隱藏原生捲軸 */
+.bottom-box::-webkit-scrollbar { display: none; }
+.bottom-box { -ms-overflow-style: none; scrollbar-width: none; }
+
+.category-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vh;
+    height: 100%;
+    flex-shrink: 0; /* 🎯 確保不被壓縮，觸發向右滑動 */
+}
+
+.category-title {
+    font-family: 'LineSeed-Eb', sans-serif;
+    font-size: 1.15rem; 
+    color: #4A4A4A;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    font-weight: bold;
+}
+
+.category-icons {
+    display: grid;
+    grid-template-rows: repeat(2, 1fr); 
+    grid-auto-flow: column; 
+    gap: 1.5vh 1.5vw; 
+}
+
+.icon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8vh; 
+    cursor: pointer;
+}
+
+.icon-item:hover .icon-box {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,234,255,0.3);
+    border-color: #00EAFF;
+}
+
+/* 🎯 完美大小：比最初的 75 大，又不會像剛才一樣變巨無霸 */
+.icon-box {
+    width: 80px; 
+    height: 80px; 
+    background-color: #fff;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s ease;
+    border: 2px solid transparent; 
+}
+
+.icon-box img {
+    width: 65%;
+    height: 65%;
+    object-fit: contain;
+}
+
+.icon-name {
+    font-family: 'LineSeed-Eb', sans-serif;
+    font-size: 0.95rem; 
+    color: #4A4A4A;
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+/* =========================================
+   第十一區域：圖標規範 (格線動畫區)
+   ========================================= */
+.icon-specification-section {
+    width: 100vw;
+    height: 100vh; 
+    position: relative;
+    /* 🚨 刪除原有的 overflow: hidden; 因為它會讓 GSAP 釘住畫面時出錯消失！ */
+    background-image: url('JPG/圖標規範_背景.jpg');
+    background-position: top center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-color: #F8F8F8; 
+    z-index: 10;
+}
+
+#icon-spec-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+}
+
+/* 🎯 新增：方格圖的專屬樣式 (預設透明、無框、無陰影、正中央) */
+.spec-diagram {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* 完美置中 */
+    width: 45%; /* 👉 你可以依據畫面的感覺微調這個大小 (例如改成 40% 或 50%) */
+    height: auto;
+    opacity: 0; /* 初始設定為完全透明 */
+    border: none;
+    box-shadow: none;
+    z-index: 2; /* 放在 SVG 線條的下方 */
+}
+
+/* SVG 格線樣式 */
+.spec-grid-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.grid-line {
+    stroke: #231815; /* 黑/深灰色線條 */
+    stroke-width: 0.2;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000; 
+}
+
+/* 🎯 新增：方格圖的專屬樣式 (預設透明、無框、無陰影、正中央) */
+.spec-diagram {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* 完美置中 */
+    width: 45%; 
+    height: auto;
+    opacity: 0; 
+    border: none;
+    box-shadow: none;
+   z-index: 4; /* 👈 調高到 4 */
+    will-change: opacity; /* ⚡ 效能優化 */
+}
+
+/* 🎯 被滾輪控制的動畫影片樣式 */
+.spec-webm {
+    position: absolute;
+    top: 49.5%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 35.5%; 
+    height: auto;
+    opacity: 0; 
+    z-index: 2;
+    pointer-events: none; 
+    
+    /* 🎯 強制清除所有可能繼承的背景、圓角、框線與陰影 */
+    background: transparent !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    will-change: opacity, transform;
+}
+/* =========================================
+   第十二區域：圖標規範細節 (滾動切換圖片)
+   ========================================= */
+.spec-details-section {
+    width: 100vw;
+    height: 400vh; /* 🎯 給予 4 張圖片足夠的滾動長度 */
+    position: relative;
+    background-image: url('JPG/圖標規範細節_背景.jpg');
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover; 
+    background-color: #F8F8F8; 
+}
+
+/* --- 第十二區域容器 --- */
+.spec-sticky-container {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    /* 🎯 關鍵修改：靠左對齊 */
+    justify-content: flex-start; 
+    align-items: center;     /* 垂直依然置中 */
+    overflow: hidden;
+    padding-left: 10%;       /* 🎯 視需求調整，讓左邊留一點呼吸空間 */
+}
+
+/* --- 第十二區域圖片 --- */
+.spec-sequence-img {
+    /* 🎯 因為你要在右邊放東西，建議寬度縮小一點 (例如 40% 或 45%) */
+    width: 90%; 
+    height: auto;
+    object-fit: contain;
+    border: none;
+    box-shadow: none;
+}
+
+/* 📱 手機版 RWD 微調 */
+@media (max-width: 768px) {
+    .spec-sequence-img {
+        width: 80%; /* 手機上讓圖片大一點 */
+    }
+}
+/* =========================================
+   第十三區域：圖標規範延伸
+   ========================================= */
+.icon-extension-section {
+    width: 100vw;
+    /* 🎯 這裡先設為 100vh (一個螢幕高)。
+       如果你接下來又要像上一區一樣「滾動切換動畫」，
+       可以再把它改成 200vh 或 400vh */
+    height: 100vh; 
+    position: relative;
+    /* 載入你提供的新背景圖 */
+    background-image: url('PNG/圖標規範細節_圖標-15.png'); 
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover; 
+    background-color: #FFFFFF; /* 預備底色，配合這張偏白的底圖 */
+}
+
+/* 將內容固定在畫面中央的容器 */
+.extension-sticky-container {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center; /* 水平置中，需要靠左可改 flex-start */
+    align-items: center;     /* 垂直置中 */
+    overflow: hidden;
+}
+
+/* 預留給你放內容的區塊 */
+.extension-content {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+/* --- 翻頁手冊整體外框 --- */
+.flipbook-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px; /* 圖片與下方控制列的間距 */
+    width: 65%; /* 🎯 你可以依照需求微調手冊的大小 (例如 60% 或 70%) */
+    max-width: 1200px;
+    z-index: 10;
+    margin-top: 200px;
+}
+
+/* --- 手冊圖片容器 (加上淡淡的陰影增加立體感) --- */
+.flipbook-container {
+    width: 80%;
+    background-color: #FFFFFF;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); /* 模擬書本放在桌上的淡淡陰影 */
+    aspect-ratio: 16 / 9; /* 強制保持 16:9 比例，避免切換時高度跳動 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+#flipbook-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: opacity 0.3s ease-in-out; /* 圖片切換時的淡入淡出動畫 */
+}
+
+/* --- 下方控制列排版 --- */
+.flipbook-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 60%; /* 讓左右箭頭稍微往內收，看起來比較集中 */
+}
+
+/* --- 左右箭頭按鈕容器 --- */
+.flip-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 10px; /* 增加點擊範圍 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- 自訂箭頭圖片設定 --- */
+.flip-btn img {
+    width: 60px; /* 🎯 決定箭頭圖片的寬度，你可以依據喜好微調 */
+    height: auto;
+    object-fit: contain;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+/* 滑鼠碰到時，箭頭圖片微微放大並稍微加深/亮 (增加互動感) */
+.flip-btn:hover:not(.disabled) img {
+    transform: scale(1.15); 
+    /* 如果你想讓箭頭 hover 時變色，也可以用 CSS filter 稍微改變亮度或對比 */
+}
+
+/* 第一頁或最後一頁時，將按鈕整組反灰並停用 */
+.flip-btn.disabled {
+    opacity: 0.2;
+    cursor: not-allowed;
+}
+
+/* --- 中間「請翻閱」文字 --- */
+.flip-text {
+    font-size: 1.1rem;
+    font-weight: 900; /* 使用粗體 */
+    color: #4A4A4A;
+    letter-spacing: 4px; /* 字距拉開一點比較有設計感 */
+}
+
+/* 📱 手機版 RWD 微調 */
+@media (max-width: 768px) {
+    .flipbook-wrapper { width: 90%; }
+    .flipbook-controls { width: 90%; }
+    .flip-btn { font-size: 1.5rem; }
+}
+/* =========================================
+   左下角：智慧返回按鈕 (回到首頁/圖標總覽)
+   ========================================= */
+.back-to-top-btn {
+    position: fixed;
+    bottom: 40px;
+    left: 40px; /* 🎯 固定在左下角 */
+    width: 65px; /* 🎯 按鈕大小，可依據喜好微調 */
+    height: 65px;
+    z-index: 9999;
+    cursor: pointer;
+    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+}
+
+.back-to-top-btn img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 滑鼠移上去的動畫 */
+.back-to-top-btn:hover {
+    transform: translateY(-10px) scale(1.05); /* 微微往上浮動並放大 */
+}
+
+/* 🎯 隱藏狀態 (在首頁與圖標總覽時會觸發) */
+.back-to-top-btn.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.9); /* 往下縮回並微縮小 */
+}
+
+/* 📱 手機版 RWD 微調 */
+@media (max-width: 768px) {
+    .back-to-top-btn {
+        bottom: 20px;
+        left: 20px;
+        width: 50px;
+        height: 50px;
+    }
+}
+
+/* =========================================
+   心理測驗滿版背景圖設定
+   ========================================= */
+#quiz-bg-img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* 🎯 抵銷外框限制，將圖片中心點對準螢幕正中央 */
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    object-fit: cover; /* 🎯 確保圖片不變形地填滿整個螢幕 */
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* =========================================
+   過場情境畫面 (修正版：僅文字放大)
+   ========================================= */
+   #interlude-bg-img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100vw;
+    height: 100vh;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: cover;
+    z-index: 0;
+    pointer-events: none;
+}
+.interlude-next-text {
+    position: absolute;
+    bottom: 25%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    cursor: pointer;
+    z-index: 10;
+    /* 移除原本在容器上的 scale */
+    transition: opacity 0.2s ease;
+}
+
+.interlude-next-text:hover {
+    opacity: 0.9;
+}
+
+/* 🎯 讓文字在 hover 時單獨放大 */
+.interlude-next-text .text {
+    color: #00EAFF;
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    transition: transform 0.3s ease; /* 平滑縮放動畫 */
+    display: inline-block;
+}
+
+.interlude-next-text:hover .text {
+    transform: scale(1.15); /* 僅文字放大 1.15 倍 */
+}
+
+.interlude-next-text .line {
+    display: inline-block;
+    width: 90px;
+    height: 3px;
+    background-color: #00EAFF;
+    /* 藍線不設定 transition scale，所以不會變動 */
+}
+/* =========================================
+   修正：超大長方形框框 (550px)
+   ========================================= */
+.target-box.wide-box {
+    width: 550px; /* 加長到 550px */
+    height: 250px; /* 高度稍微增加增加容錯 */
+}
+
+/* 重新計算 550x250 長方形的周長 (約 1520) */
+.target-progress.wide-progress {
+    stroke-dasharray: 1520; 
+    stroke-dashoffset: 1520; 
+}
+
+/* 確保倒數時進度條正確運作 */
+.target-box.counting-down .target-progress.wide-progress {
+    stroke-dashoffset: 1520 !important;
+}

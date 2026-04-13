@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>你的專屬手語拍貼</title>
+    <style>
+        body { margin: 0; background: #f4f4f4; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; font-family: sans-serif; }
+        .v-card { width: 90%; max-width: 400px; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
+        video { width: 100%; border-radius: 10px; margin-bottom: 20px; }
+        .dl-btn { background: #00EAFF; color: white; padding: 15px 30px; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="v-card">
+        <h2 style="color: #4A4A4A;">🎉 拍貼完成！</h2>
+        <video id="player" controls autoplay loop playsinline></video>
+        <p style="font-size: 0.9rem; color: #888;">長按影片或點擊下方按鈕下載 MP4</p>
+        <a id="downloadBtn" class="dl-btn" href="#" download="我的手語拍貼.mp4">📥 下載影片</a>
+    </div>
+
+    <script>
+        const videoUrl = new URLSearchParams(window.location.search).get('video');
+        if(videoUrl) {
+            document.getElementById('player').src = videoUrl;
+            document.getElementById('downloadBtn').href = videoUrl;
+        }
+    </script>
+</body>
+</html>

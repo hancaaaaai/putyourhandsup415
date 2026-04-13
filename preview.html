@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拍貼預覽與下載</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+    <style>
+        /* 🚨 修復關鍵 1：不要用 display: none，改用透明+移出畫面，強迫瀏覽器解析影片 */
+        #source-videos {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            opacity: 0.01;
+            pointer-events: none;
+            overflow: hidden;
+            width: 1px;
+            height: 1px;
+        }
+    </style>
+</head>
+<body class="booth-page">
+
+    <div id="preview-ui" class="preview-stage">
+        
+        <div class="preview-image-container">
+            <img src="JPG/心理測驗結果_背景.jpg" class="preview-base-img" alt="預覽背景">
+
+            <div class="video-group-container">
+                <canvas id="resultCanvas" class="final-canvas"></canvas>
+            </div>
+
+            <div id="ui-qrcode" class="preview-qr-img" style="background:#fff; padding:10px; border-radius:15px; display:flex; justify-content:center; align-items:center;">
+                <span style="color:#aaa; font-size: 1rem; font-weight: bold;">處理中...</span>
+            </div>
+
+            <div class="preview-btn-group">
+                <button class="res-btn outline-btn" onclick="window.location.href='booth-duo-ipad.html'">重新拍攝</button>
+                <button class="res-btn solid-btn" onclick="window.location.href='message.html'">來留言吧！</button>
+            </div>
+            
+        </div>
+    </div>
+
+    <div id="source-videos">
+        <video id="template-video" loop muted playsinline crossorigin="anonymous"></video>
+    </div>
+
+    <script>
+// ==========================================
+// 1. 設定與初始化
+// ==========================================
+const CLIP_POSITIONS = [
+    { x: 550, y: 1950, w: 1410, h: 795, rotate: 8 }, 
+    { x: 450, y: 2800, w: 1410, h: 795, rotate: 8 }  
+];
+
+const canvas = document.getElementById('resultCanvas');
+const ctx = canvas.getContext('2d', { alpha: false }); 
+const templateVideo = document.getElementById('template-video');
+
+// ==========================================
+// 2. 資料庫與「同步起跑」工具
+// ==========================================
+function getBlobFromDB(key) {
+    return new Promise((resolve) => {
+        const request = indexedDB.open("PhotoboothDB", 3);
+        request.onsuccess = e => {
+            const db = e.target.result;
+            if(!db.objectStoreNames.contains("videos")) { resolve(null); return; }
+            const tx = db.transaction("videos", "readonly");
+            const req = tx.objectStore("videos").get(key);
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => resolve(null);
+        };
+        request.onerror = () => resolve(null);
+    });
+}
+
+// 🛑 修正：強迫瀏覽器乖乖下載影片的升級版
+function prepareVideo(videoEl, srcData) {
+    return new Promise((resolve) => {
+        videoEl.muted = true;
+        videoEl.loop = true;
+        videoEl.playsInline = true;
+        
+        // ⚠️ 關鍵：必須開啟 autoplay，瀏覽器才會真正去抓取畫面！
+        videoEl.autoplay = true; 
+
+        // 當畫面成功載入「第一幀」時
+        videoEl.onloadeddata = () => {
+            videoEl.pause(); // 立刻按暫停！等大家一起到齊再跑
+            resolve(videoEl);
+        };
+        
+        // 萬一壞檔，也不要卡死
+        videoEl.onerror = () => resolve(videoEl); 
+
+        if (typeof srcData === 'string') {
+            videoEl.src = srcData;
+        } else {
+            videoEl.src = URL.createObjectURL(srcData);
+        }
+        
+        // 3秒超時保護 (稍微拉長一點點確保載入)
+        setTimeout(() => resolve(videoEl), 3000); 
+    });
+}
+
+// ==========================================
+// 3. 核心：完美同步與合成畫面
+// ==========================================
+document.addEventListener('DOMContentLoaded', async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const role = urlParams.get('role') || '淘氣女'; 
+    const container = document.getElementById('source-videos');
+    const qrContainer = document.getElementById('ui-qrcode');
+
+    qrContainer.innerHTML = '<span style="color:#aaa; font-size: 1rem; font-weight: bold;">準備影片中...</span>';
+
+    // 🛑 同時平行載入這 3 支影片 (省下超多時間)
+    const pTemplate = prepareVideo(templateVideo, `photo/${role}_拍照模板.webm`);
+    
+    const pClip1 = getBlobFromDB('clip_1').then(blob => {
+        if(!blob) return null;
+        const v = document.createElement('video');
+        container.appendChild(v);
+        return prepareVideo(v, blob);
+    });
+    
+    const pClip2 = getBlobFromDB('clip_2').then(blob => {
+        if(!blob) return null;
+        const v = document.createElement('video');
+        container.appendChild(v);
+        return prepareVideo(v, blob);
+    });
+
+    // 🛑 等待「所有人」都抵達起跑線
+    const [readyTemplate, readyClip1, readyClip2] = await Promise.all([pTemplate, pClip1, pClip2]);
+    const userClips = [readyClip1, readyClip2];
+
+    // 設定畫布尺寸
+    canvas.width = templateVideo.videoWidth || 1080;
+    canvas.height = templateVideo.videoHeight || 1920;
+
+    // 🛑 重頭戲：全部歸零，同時按下播放鍵！(完美解決一開始沒模板的問題)
+    [templateVideo, readyClip1, readyClip2].forEach(v => {
+        if (v && v.videoWidth > 0) {
+            v.currentTime = 0; 
+            v.play().catch(e=>console.log(e));
+        }
+    });
+
+    // 開始畫圖與錄影
+    render(); 
+    startCanvasRecording(); 
+
+    function render() {
+        ctx.fillStyle = '#FFFFFF'; 
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        userClips.forEach((v, index) => {
+            const pos = CLIP_POSITIONS[index];
+            if (v && v.videoWidth > 0) {
+                try { drawVideo(ctx, v, pos.x, pos.y, pos.w, pos.h, pos.rotate); } catch(e) {}
+            }
+        });
+        
+        if (templateVideo.videoWidth > 0) {
+            try { ctx.drawImage(templateVideo, 0, 0, canvas.width, canvas.height); } catch(e) {}
+        }
+        requestAnimationFrame(render);
+    }
+});
+
+function drawVideo(ctx, video, x, y, width, height, degrees) {
+    ctx.save();
+    ctx.translate(x + width/2, y + height/2);
+    ctx.rotate(degrees * Math.PI / 180.0);
+    
+    const ratio = video.videoWidth / video.videoHeight;
+    const targetRatio = width / height;
+    let sw, sh, sx, sy;
+
+    if (ratio > targetRatio) {
+        sh = video.videoHeight;
+        sw = sh * targetRatio;
+        sy = 0; sx = (video.videoWidth - sw) / 2;
+    } else {
+        sw = video.videoWidth;
+        sh = sw / targetRatio;
+        sx = 0; sy = (video.videoHeight - sh) / 2;
+    }
+    
+    ctx.scale(-1, 1); // 鏡像翻轉
+    ctx.drawImage(video, sx, sy, sw, sh, -width/2, -height/2, width, height);
+    ctx.restore();
+}
+
+// ==========================================
+// 4. 錄製、上傳與產生 QR Code
+// ==========================================
+function startCanvasRecording() {
+    const stream = canvas.captureStream(30);
+    const mimeType = 'video/webm';
+    const recorder = new MediaRecorder(stream, { mimeType: mimeType });
+    const chunks = [];
+    
+    recorder.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
+    
+    recorder.onstop = async () => {
+    const finalBlob = new Blob(chunks, { type: mimeType });
+    const qrContainer = document.getElementById('ui-qrcode');
+    
+    // 顯示上傳中狀態
+    qrContainer.innerHTML = '<span style="color:#aaa; font-size: 1rem; font-weight: bold; text-align: center;">雲端生成中...</span>';
+    
+    // 🚀 填入你自己的資料
+   const cloudName = 'dz8vnxfts'; 
+        const uploadPreset = 'put your hands up';
+
+    const formData = new FormData();
+    formData.append('file', finalBlob);
+    formData.append('upload_preset', uploadPreset);
+
+    try {
+        // 1. 直接傳送到 Cloudinary 雲端
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/video/upload`, {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+        
+        if (result.secure_url) {
+            // 🌟 核心魔法：只要將網址結尾從 .webm 換成 .mp4，雲端會自動幫你轉檔！
+            const mp4Url = result.secure_url.replace('.webm', '.mp4');
+            
+            // 🚨 這裡填入你部署在 GitHub Pages 或 Vercel 的 share.html 完整網址
+            const githubUrl = 'https://hancaaaaai.github.io/putyourhandsup415'; 
+            const mobilePageUrl = `${githubUrl}/share.html?video=${encodeURIComponent(mp4Url)}`;
+
+            // 2. 生成 QR Code
+            qrContainer.innerHTML = ''; 
+            new QRCode(qrContainer, {
+                text: mobilePageUrl,
+                width: 200, height: 200,
+                colorDark : "#3b3f44", colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.L 
+            });
+        } else {
+            qrContainer.innerHTML = '<span style="color:red;">上傳失敗</span>';
+        }
+    } catch (error) {
+        console.error("Cloudinary 上傳失敗：", error);
+        qrContainer.innerHTML = '<span style="color:red;">網路錯誤</span>';
+    }
+};
+    
+    recorder.start();
+    // 錄製 11.5 秒
+    setTimeout(() => { recorder.stop(); }, 11500); 
+}
+    </script>
+</body>
+</html>
