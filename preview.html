@@ -233,11 +233,10 @@ function startCanvasRecording() {
         const result = await response.json();
         
         if (result.secure_url) {
-           // 🌟 核心魔法升級：強制 Cloudinary 轉為 iPhone 絕對支援的 H.264 MP4 格式！
+// 🌟 核心魔法終極版：強制轉 MP4 + H.264 編碼 + 寬度720 + 移除空音軌 (專治 iPhone 疑難雜症)
 const mp4Url = result.secure_url
-    .replace('/upload/', '/upload/f_mp4,vc_h264/')
+    .replace('/upload/', '/upload/f_mp4,vc_h264,q_auto,w_720,ac_none/')
     .replace('.webm', '.mp4');
-            
             // 🚨 這裡填入你部署在 GitHub Pages 或 Vercel 的 share.html 完整網址
             const githubUrl = 'https://hancaaaaai.github.io/putyourhandsup415'; 
             const mobilePageUrl = `${githubUrl}/share.html?video=${encodeURIComponent(mp4Url)}`;
