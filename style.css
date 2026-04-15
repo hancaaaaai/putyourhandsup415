@@ -74,14 +74,14 @@ body {
 .hand {
     position: absolute;
     bottom: 20px; 
-    width: 2500px; 
-    max-width: 45%; 
+    width: 2600px; 
+    max-width: 40%; 
     transition: left 0.3s ease, right 0.3s ease; 
 }
 .left-hand { left: -250px; }
 .right-hand { right: -250px; }
-.hero-section:has(#startBtn:hover) .left-hand { left: -230px; }
-.hero-section:has(#startBtn:hover) .right-hand { right: -230px; }
+.hero-section:has(#startBtn:hover) .left-hand { left: -200px; }
+.hero-section:has(#startBtn:hover) .right-hand { right: -200px; }
 
 /* 標題旁的手掌 */
 .hand-palm {
@@ -535,10 +535,10 @@ html, body { -ms-overflow-style: none; scrollbar-width: none; }
 .res-dynamic-video {
     position: absolute;
     z-index: 2;          /* 🎯 確保層級大於底圖的 1，這樣才會浮在上面 */
-    top: 53%;            /* 垂直置中 */
+    top: 50%;            /* 垂直置中 */
     left: 30%;           /* 🎯 讓影片靠左側 (數值越小越靠左) */
     transform: translate(-50%, -50%); 
-    width: 27%;          /* 🎯 影片的大小，可以根據你的視覺需求微調 */
+    width: 33%;          /* 🎯 影片的大小，可以根據你的視覺需求微調 */
     height: auto;
     object-fit: contain;
     pointer-events: none; /* 讓滑鼠可以穿透影片，不會干擾其他點擊 */
@@ -967,19 +967,20 @@ html, body { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
 /* --- 放置 Canvas 的容器 --- */
+/* --- 放置 Canvas 的容器 --- */
 .video-group-container {
     position: absolute;
     z-index: 2;
     
-    /* 🎯 【終極解法】：用 width 控制大小，height 設為 auto，絕對不會被壓縮！ */
-    width: 16.5%;           /* 💡 只要調整這個數字，就能放大或縮小整個模板 */
-    height: auto;         /* 讓高度自己去算，保證不變形 */
+    /* 🎯 放大指南：把寬度從 16.5% 調大。例如改成 24% (數字越大，整個模板就越大) */
+    width: 24%;           
+    height: auto;         
   
-    /* 🎯 微調位置：請根據底圖調整，把它推到藍色框框上 */
-    top: 17%;      
-    left: 12.8%;      
+    /* 🎯 位置微調：因為變大了，所以要往上跟往左推一點來重新置中 */
+    /* 請根據你新的底圖視覺來微調這兩個數字 */
+    top: 18%;      /* 數字越大越往下 */
+    left: 8%;      /* 數字越大越往右 */
 }
-
 /* 合成好的最終畫布 */
 .final-canvas {
     width: 100%;
@@ -1030,6 +1031,37 @@ html {
     background-size: cover; /* 讓圖片填滿整個螢幕 */
     position: relative;
     overflow: hidden;
+}
+
+/* =========================================
+   首頁：疊加在首圖上的動畫影片
+   ========================================= */
+.hero-anim-video {
+    position: absolute;
+    z-index: 5; /* 確保在底圖之上，但在 LOGO 與導覽列之下 (z-index: 9999) */
+    pointer-events: none; /* 讓滑鼠穿透，才不會擋到後面的點擊動作 */
+}
+
+/* 🎯 學校動畫的專屬設定 (你可以自己調數字！) */
+.hero-school {
+    top: 32%;       /* 上下位置：數字越大越靠下 */
+    left: 78.7%;      /* 左右位置：數字越大越往右 */
+    width: 200px;   /* 動畫大小 */
+    height: auto;
+}
+
+/* 🎯 樓梯動畫的專屬設定 (你可以自己調數字！) */
+.hero-stairs {
+    bottom: 20.5%;    /* 上下位置：這裡示範用 bottom，數字越大越往上 */
+    right: 30%;     /* 左右位置：這裡示範用 right，數字越大越往左 */
+    width: 200px;   /* 動畫大小 */
+    height: auto;
+}
+
+/* 📱 手機版 RWD 微調 (讓動畫在手機上變小一點，避免擋住畫面) */
+@media (max-width: 768px) {
+    .hero-school { width: 180px; top: 20%; left: 5%; }
+    .hero-stairs { width: 200px; bottom: 15%; right: 5%; }
 }
 /* =========================================
    浮動 LOGO (左上角)
@@ -1196,13 +1228,12 @@ html {
     position: relative;
 }
 /* =========================================
-   什麼是動字動字 (旗艦級：滾輪連動動畫)
+   什麼是動字動字 (順序出現 + 斜向飛入版)
    ========================================= */
 
-/* 🚨 1. 確保只有這一個 .what-is-section，且絕對不能有 overflow: hidden; */
 .what-is-section {
     width: 100%;
-    height: 200vh; 
+    height: 400vh; /* 維持 400vh 讓動態有空間跑 */
     background-image: url('JPG/什麼是動字動字_背景.jpg'); 
     background-position: top center;
     background-repeat: no-repeat;
@@ -1214,13 +1245,10 @@ html {
     position: sticky;
     top: 0;
     width: 100%;
- 
     height: 100vh; 
-
-    overflow: hidden; /* 這個屬性只能加在這裡，用來裁切突出去的牌子 */
+    overflow: hidden; 
 }
 
-/* 牌子共用設定：中心點對齊 */
 .sign-item {
     position: absolute;
     transform: translate(-50%, -50%); 
@@ -1228,25 +1256,62 @@ html {
 }
 
 /* =========================================
-   動畫軌跡計算 (強制修復版)
+   🎯 標牌路徑自訂區 (你可以調整 start/end 數值)
    ========================================= */
 
+/* 1. 三角形牌子：最先跑 (進度 0 ~ 0.5 跑完) */
 .sign-triangle {
-    /* 橫向：從 15% 飛到 50% */
-    left: calc(35% + (15.5% * var(--p, 0))) !important; 
-    /* 直向：從 20vh 降落到 50vh */
-    top: calc(40vh + (20vh * var(--p, 0))) !important;
-    /* 尺寸：從 400px 變為 250px */
-    width: calc(450px - (250px * var(--p, 0))) !important; 
-    display: block !important;
+    /* 這裡定義進度變數 lp1 (Local Progress 1) */
+    --lp1: clamp(0, var(--p, 0) * 2, 1); 
+    
+    /* 左右：從 -30% 飛到 35% */
+    left: calc(-30% + (80.5% * var(--lp1))) !important; 
+    /* 上下：從 120vh 飛到 60vh (這裡你可以調整 top) */
+    top: calc(120vh - (60vh * var(--lp1))) !important;
+    
+    width: 180px !important; 
 }
 
+/* 2. 手牌子：中間跑 (進度 0.25 ~ 0.75 跑完) */
 .sign-hand {
-    left: calc(60% - (9% * var(--p, 0))) !important;
-    top: calc(75vh + (1vh * var(--p, 0))) !important;
-    width: calc(720px - (360px * var(--p, 0))) !important;
+    /* lp2：扣掉 0.25 的延遲，並乘以 2 倍速 */
+    --lp2: clamp(0, (var(--p, 0) - 0.25) * 2, 1);
+    
+    /* 左右：從 130% 飛到 65% (右側飛入) */
+    left: calc(130% - (79% * var(--lp2))) !important;
+    /* 上下：從 120vh 飛到 65vh */
+    top: calc(120vh - (45vh * var(--lp2))) !important;
+    
+    width: 320px !important;
 }
 
+/* 3. 長方形牌子：最後跑 (進度 0.5 ~ 1.0 跑完) */
+.sign-rectangle {
+    /* lp3：扣掉 0.5 的延遲，並乘以 2 倍速 */
+    --lp3: clamp(0, (var(--p, 0) - 0.5) * 2, 1);
+    
+    /* 左右：從 -50% 飛到 50% */
+    left: calc(-50% + (100.5% * var(--lp3))) !important;
+    /* 上下：從 150vh 飛到 85vh (起始高度設 150 讓它飛更遠更斜) */
+    top: calc(150vh - (65vh * var(--lp3))) !important;
+    
+    width: 300px !important; 
+}
+
+/* 💡 標題文字：滑動時淡入 (如果你想改回自動，請配合 script.js 的 .active 寫法) */
+.what-is-title {
+    position: absolute;
+    top: 30%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'LINE Seed TW', sans-serif;
+    font-weight: 700;
+    font-size: 5rem;
+    color: #4A4A4A;
+    white-space: nowrap;
+    z-index: 5;
+    /* 根據總進度淡入 */
+    opacity: calc(var(--p, 0) * 4); 
+}
 /* =========================================
    背景雲朵視差特效 (獨立運作，絕對不影響牌子)
    ========================================= */
@@ -1288,7 +1353,7 @@ html {
 .cloud-d { left: 80%; top: 85vh; width: 200px; --speed: -25vh; }
 
 /* E: 畫面偏中間的 01 雲 (🚨 加上 width 限制) */
-.cloud-e { left: 35%; top: 100vh; width: 500px; --speed: -50vh; }
+.cloud-e { left: 30%; top: 120vh; width: 500px; --speed: -40vh; }
 
 /* =========================================
    讓手語成為日常的風景 (第四區域：全螢幕背景)
@@ -1350,16 +1415,35 @@ html {
     pointer-events: none; /* 讓滑鼠穿透 */
 }
 
-/* 3. 上層的手部 PNG 圖片 */
-.audience-hands-overlay {
+/* 🎯 客群區塊樣式設定 */
+.target-audience-section {
+    position: relative; /* 必備：讓圖片可以絕對定位蓋在上面 */
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* 1. 圖片蓋在影片上方 */
+.audience-text-overlay {
     position: absolute;
-    top: 31%;
-    left: 36%;
-    width: 28%; /* 大小完全跟隨影片 */
-    height: 28%;
-    object-fit: contain; /* 確保比例不變形 */
-    z-index: 2; /* 確保它蓋在影片的上面 */
-    pointer-events: none; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 讓圖片完美貼合背景 */
+    z-index: 5;
+    pointer-events: none; /* 讓滑鼠點擊可以穿透圖片 */
+    
+    /* 2. 設定初始透明度 */
+    opacity: 0;
+    
+    /* 3. 設定淡入動畫時間：1.5秒 */
+    transition: opacity 2.5s ease-out; 
+}
+
+/* 💡 當 JS 感測到滑到此區塊，會加上 .is-active，圖片就會自己變亮 */
+.target-audience-section.is-active .audience-text-overlay {
+    opacity: 1;
 }
 /* =========================================
    第六區域：放大鏡透視互動區
@@ -1428,7 +1512,7 @@ html {
     /* 讓放大鏡照到的地方，底下的模糊文字會被挖出一個乾淨的圓洞，就不會有陰影透出來了！ */
     --x: 50%;
     --y: 50%;
-    --mask-size: 160px; 
+    --mask-size: 200px; 
     -webkit-mask-image: radial-gradient(circle at var(--x) var(--y), transparent calc(var(--mask-size) - 10px), black var(--mask-size));
     mask-image: radial-gradient(circle at var(--x) var(--y), transparent calc(var(--mask-size) - 10px), black var(--mask-size));
 }
@@ -1449,7 +1533,7 @@ html {
     /* 預設把遮罩放在正中央 */
     --x: 50%;
     --y: 50%;
-    --mask-size: 160px; /* 🎯 這是「清晰範圍」的半徑大小，請根據你的放大鏡微調 */
+    --mask-size: 200px; /* 🎯 這是「清晰範圍」的半徑大小，請根據你的放大鏡微調 */
 
     /* 魔法核心：只顯示 (x,y) 座標周圍的圓形區域，其他全部隱藏 */
     -webkit-mask-image: radial-gradient(circle at var(--x) var(--y), black calc(var(--mask-size) - 10px), transparent var(--mask-size));
@@ -1464,9 +1548,9 @@ html {
     top: var(--y, 50%);
     
     /* 🎯 如果你的放大鏡鏡片不是在圖片正中央，可以微調這兩個 -50% (例如 -40%, -40%) 來對齊 */
-    transform: translate(52%, 28%); 
+    transform: translate(29%, 10%); 
     
-    width: 450px; /* 🎯 請根據 PNG 實際大小微調 */
+    width: 600px; /* 🎯 請根據 PNG 實際大小微調 */
     height: auto;
     pointer-events: none; 
     z-index: 10;
@@ -1482,6 +1566,52 @@ html {
 /* =========================================
    第七區域：台灣手語現況 (旗艦級：自然滾動卡片)
    ========================================= */
+
+.status-title-container {
+    position: absolute;
+    top: 15%; /* 🎯 上下位置：數字越大越往下，可依據你的影片位置微調 */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5; 
+    text-align: center;
+    font-family: 'LINE Seed TW', sans-serif;
+    font-weight: 400; /* 🎯 指定使用 Regular (Rg) 字重 */
+    color: #4A4A4A;   /* 深灰色字體 */
+    font-size: 1.4rem;
+    line-height: 1.6;
+}
+
+.typewriter-line {
+    overflow: hidden;
+    white-space: nowrap;
+    margin: 0 auto;
+    width: 0; /* 初始寬度為 0，把字藏起來 */
+    border-right: 2px solid transparent; /* 模擬打字游標 */
+}
+
+/* 當 JS 加上 .is-active 時，啟動打字動畫 */
+.status-title-container.is-active .line-1 {
+    /* 第一行：4個字，打字時間 1秒 */
+    animation: type-line1 1s steps(4, end) forwards;
+}
+
+.status-title-container.is-active .line-2 {
+    /* 第二行：6個字，打字時間 1.5秒，並且延遲 1秒等第一行打完才開始 */
+    animation: type-line2 1.5s steps(6, end) 1s forwards;
+}
+
+/* 🎯 動畫關鍵影格 (中文字剛好是 1em 寬度) */
+@keyframes type-line1 {
+    0% { width: 0; border-right-color: #4A4A4A; }
+    99% { border-right-color: #4A4A4A; }
+    100% { width: 4em; border-right-color: transparent; } /* 打完後游標消失 */
+}
+
+@keyframes type-line2 {
+    0% { width: 0; border-right-color: #4A4A4A; }
+    99% { border-right-color: #4A4A4A; }
+    100% { width: 6em; border-right-color: transparent; } /* 打完後游標消失 */
+}
 .current-status-section {
     width: 100%;
     height: 400vh; /* 🎯 保留三個螢幕高，提供足夠的滾動空間 */
@@ -1611,10 +1741,11 @@ html {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    margin-top: 100px; /* 🎯 往下推，避開你背景圖上的標題文字 */
+    margin-top: 100px; /* 往下推，避開背景圖上的標題文字 */
     padding-left: 250px;
+    position: relative; /* 🎯 新增：設定為相對定位 */
+    z-index: 10;        /* 🎯 新增：把層級拉高，確保文字疊在滿版影片的上方 */
 }
-
 .learn-list {
     list-style: none;
     padding: 0;
@@ -1664,55 +1795,70 @@ html {
 
 /* --- 右側影片區塊 --- */
 .learn-video-content {
-    width: 45%;
-    height: 70%;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 100px; /* 稍微往下對齊 */
+    position: absolute; /* 🎯 絕對定位，讓它脫離左右排版 */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;       /* 🎯 跟著整個螢幕一樣大 */
+    z-index: 1;         /* 🎯 放在底層 (在背景圖之上、文字之下) */
+    pointer-events: none; /* 確保影片不會擋到使用者的滑鼠點擊 */
 }
 
-/* 影片預設隱藏 (淡出) */
 .learn-video {
     position: absolute;
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover; 
     opacity: 0;
-    transition: opacity 0.6s ease-in-out, transform 0.6s ease;
-    pointer-events: none;
-    transform: scale(0.95); 
+    
+    /* 🎯 拿掉原本的 scale 縮放與長時間的 fade-in 動畫 */
+    /* 只保留極短的 0.1 秒透明度切換，避免影片載入的瞬間產生黑畫面閃爍 */
+    transition: opacity 0.1s ease; 
 }
 
-/* 影片啟動狀態 (淡入) */
+/* 影片啟動狀態 (直接顯示) */
 .learn-video.active {
     opacity: 1;
-    transform: scale(1);
 }
 
-/* 📱 手機版 RWD 調整 */
+/* 🎯 學習手語區塊：文字 PNG (精準定位與自訂大小版) */
+.learn-text-overlay {
+    position: absolute;
+    z-index: 5;        
+    pointer-events: none; 
+    opacity: 1; 
+    
+    /* 🎯 關鍵修復：解除變形封印 */
+    width: 600px;  /* 👈 控制文字圖片的寬度 (覺得太大就改小，如 400px) */
+    height: auto;  /* 👈 讓高度自動等比例縮放，保證絕對不變形！ */
+    object-fit: contain; 
+    
+    /* 🎯 調整位置：讓它待在你截圖中的指定區塊 */
+    top: 25%;      /* 👈 上下位置：數字越大越往下 */
+    left: 24%;     /* 👈 左右位置：數字越大越往右 (用來對齊下方的選單) */
+}
+
+/* 📱 手機版 RWD 微調 (避免手機螢幕太小導致文字超出畫面) */
 @media (max-width: 900px) {
-    .learn-sticky-container { flex-direction: column; padding: 10% 5%; justify-content: center; }
-    .learn-text-content, .learn-video-content { width: 100%; margin-top: 30px; }
-    .learn-item { font-size: 1.3rem; }
-    .learn-item.active { transform: translateX(80px); }
-    .learn-item::before { width: 70px; left: -85px; }
+    .learn-text-overlay {
+        width: 300px;
+        top: 10%;
+        left: 5%;
+    }
 }
 /* =========================================
    第九區域：動字動字做了甚麼 (跨雙區域垂直軸線)
    ========================================= */
 .what-we-did-section {
-    width: 100%;
-    height: 200vh; /* 🎯 設定為兩個螢幕高，讓它橫跨兩個區域 */
-    
-    /* 載入你的背景圖 */
-    background-image: url('JPG/動字動字做了甚麼_背景.jpg'); 
-    background-position: top center; /* 讓圖片從最上面開始對齊 */
+    width: 100vw; 
+    height: 300vh; /* 🎯 修改 1：將長度加長到 300vh */
+    background-image: url('JPG/動字動字做了甚麼_背景.jpg');
+    background-position: top center;
     background-repeat: no-repeat;
-    background-size: 100% auto; /* 寬度 100% 填滿，高度讓它自然延伸 */
-    
-    position: relative; 
+    background-size: 100% auto;
+    position: relative;
+    flex-shrink: 0;
+    overflow: hidden; /* 🎯 新增：確保跑馬燈超出畫面的部分被裁切，不會出現橫向卷軸 */
 }
 
 /* 📱 手機版 RWD 微調 (避免手機螢幕太窄導致圖片高度不夠 200vh) */
@@ -1721,7 +1867,44 @@ html {
         background-size: cover; 
     }
 }
+/* =========================================
+   🎯 新增：跑馬燈外框與對齊設定
+   ========================================= */
+.marquee-container {
+    position: absolute;
+    /* 👇 微調指南 👇 */
+    top: -181%;                 /* 1. 上下位置：數字越大越往下，請對齊背景的藍色條 */
+    transform: rotate(9.5deg); /* 2. 傾斜角度：正數代表右下斜，請對齊藍色條的斜度 */
+    
+    left: -10%;              /* 讓跑馬燈稍微超出左邊緣，避免穿幫 */
+    width: 120%;             /* 讓跑馬燈夠長 */
+    z-index: 2;
+    pointer-events: none;    /* 讓滑鼠點擊可以穿透 */
+}
 
+/* 跑馬燈動畫引擎 */
+.marquee-text {
+    display: flex;
+    white-space: nowrap;
+    animation: marquee-scroll 25s linear infinite; /* 25s 是速度，數字越小跑越快 */
+}
+
+/* 跑馬燈文字外觀 */
+.marquee-text span {
+    font-family: 'LINE Seed TW', sans-serif;
+    font-weight: 600;     /* 用最粗的字體比較有設計感 */
+    font-size: 4rem;      /* 🎯 文字大小，請依據藍色長條的粗細微調 */
+    color: #00EAFF;       /* 🎯 文字顏色：預設白色，可改成 #333333 變深色 */
+    padding: 0 40px;      /* 每個句子之間的間距 */
+    letter-spacing: 5px;
+    opacity: 1;         /* 微微的透明度讓它更融入背景 */
+}
+
+/* 無縫滾動動畫 */
+@keyframes marquee-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); } 
+}
 /* =========================================
    整合軌道 (退回最穩定的 100vw / 200vw 比例)
    ========================================= */
@@ -1737,19 +1920,7 @@ html {
     will-change: transform;
 }
 
-/* =========================================
-   第九區域：動字動字做了甚麼 (維持垂直 200vh)
-   ========================================= */
-.what-we-did-section {
-    width: 100vw; /* 🎯 退回 100vw */
-    height: 200vh; 
-    background-image: url('JPG/動字動字做了甚麼_背景.jpg');
-    background-position: top center;
-    background-repeat: no-repeat;
-    background-size: 100% auto;
-    position: relative;
-    flex-shrink: 0;
-}
+
 
 /* 觸發 GSAP 橫移的隱形感測點 */
 #pan-trigger {
@@ -1771,17 +1942,42 @@ html {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); 
 }
 .media-box video, .media-box img { width: 100%; height: 100%; display: block; object-fit: cover; }
-.box-1 { top: 26%; right: 10%; }
-.box-2 { top: 54%; left: 7%; }
-.box-3 { top: 77%; right: 12%; }
+.box-1 { top: 17%; right: 9.8%; }
+.box-2 { top: 49.8%; left: 7.5%; }
+.box-3 { top: 84%; right: 11.5%; }
+.go-to-overview-btn {
+    position: absolute;
+    /* 🎯 讓它固定在這個 300vh 區塊的「最右下角」 */
+    bottom: 5vh;   
+    right: 5vw;    
+    width: 250px;  /* 👈 如果覺得太大或太小，可以改這個數字 */
+    height: auto;
+    z-index: 20;
+    cursor: pointer;
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
 
+/* 🖱️ 滑鼠移過去的特效：微微向右放大，強化「往右走」的視覺暗示 */
+.go-to-overview-btn:hover {
+    transform: translateX(10px) scale(1.05); 
+    filter: brightness(1.1); /* 稍微變亮 */
+}
+
+/* 📱 手機版 RWD 微調 */
+@media (max-width: 768px) {
+    .go-to-overview-btn {
+        width: 150px;
+        bottom: 3vh;
+        right: 3vw;
+    }
+}
 /* =========================================
    第十區域：圖標總覽與垂直內容
    ========================================= */
 .icon-overview-section {
     width: 100vw; /* 🎯 退回 100vw */
     min-height: 100vh;
-    margin-top: 100vh; 
+    margin-top: 200vh; 
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
@@ -1849,6 +2045,7 @@ html {
 }
 
 .grid-bottom { 
+    position: relative; /* 🎯 關鍵修復：加入這行，把黑色遮罩死死鎖在下半部！ */
     height: 42%; 
     width: 100%;
     display: flex; 
@@ -1865,6 +2062,51 @@ html {
    第十區域：網格內部內容排版 (放大圖標 + 橫滑)
    ========================================= */
 
+  /* =========================================
+   🎯 圖標拖曳提示遮罩 (Drag Overlay)
+   ========================================= */
+.drag-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.65); /* 半透明黑色底 */
+    border-radius: 20px; /* 配合你原本的圓角設計 */
+    z-index: 50; /* 確保蓋在圖標上方 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    
+    /* 🎯 關鍵魔法：讓滑鼠點擊可以直接穿透遮罩，不會阻擋拖曳動作 */
+    pointer-events: none; 
+    transition: opacity 0.5s ease;
+}
+
+/* 小白點擺動動畫 */
+.swing-dot {
+    width: 18px;
+    height: 18px;
+    background-color: #FFFFFF;
+    border-radius: 50%;
+    animation: swing-left-right 1.5s ease-in-out infinite;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); /* 淡淡的發光 */
+}
+
+/* 提示文字 */
+.drag-overlay p {
+    color: #FFFFFF;
+    font-size: 1.1rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin: 0;
+}
+
+/* 左右來回擺動的關鍵影格 */
+@keyframes swing-left-right {
+    0%, 100% { transform: translateX(-35px); }
+    50% { transform: translateX(35px); }
+}
 /* --- 左上角：影片展示區 --- */
 .top-left-box {
     display: flex;
@@ -1905,11 +2147,14 @@ html {
     overflow-y: hidden;
     padding: 3vh 3vw;
     display: flex;
-    align-items: flex-start; /* 🎯 靠上對齊，讓圖標順利展開 */
-    gap: 4vw; /* 類別之間的間距 */
-    scroll-behavior: smooth;
+    align-items: flex-start; 
+    gap: 4vw; 
+    
+    /* 🎯 刪除原本的 scroll-behavior: smooth; 以免拖曳時卡卡的 */
+    /* 🎯 新增：防止拖曳時不小心選取(反白)到文字 */
+    user-select: none; 
+    -webkit-user-select: none;
 }
-
 /* 隱藏原生捲軸 */
 .bottom-box::-webkit-scrollbar { display: none; }
 .bottom-box { -ms-overflow-style: none; scrollbar-width: none; }
@@ -2158,77 +2403,133 @@ html {
     margin-top: 200px;
 }
 
-/* --- 手冊圖片容器 (加上淡淡的陰影增加立體感) --- */
-.flipbook-container {
-    width: 80%;
+/* =========================================
+   🎯 專屬單頁翻閱閱讀器 (日曆疊加版)
+   ========================================= */
+.flipbook-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px; 
+    width: 65%; 
+    max-width: 1200px;
+    z-index: 10;
+    margin-top: 200px;
+    position: relative; /* 🎯 讓左右箭頭以此為基準定位 */
+}
+.custom-slider-container {
+    width: 100%;
+    aspect-ratio: 16 / 9; 
+    
+    /* 🎯 關鍵：取消 hidden，以免翻頁的立體邊角被切斷 */
+    overflow: visible; 
+    
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
     background-color: #FFFFFF;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); /* 模擬書本放在桌上的淡淡陰影 */
-    aspect-ratio: 16 / 9; /* 強制保持 16:9 比例，避免切換時高度跳動 */
+    
+    /* 🎯 決定 3D 立體感的強度，數字越小越誇張，2500px 最自然 */
+    perspective: 2500px; 
+}
+
+.slider-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d; /* 啟用 3D 空間 */
+}
+
+/* 🎯 每一張紙片的基礎設定 */
+.slide-page {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    
+    /* 🎯 裝訂線在左側，所以沿著左側邊緣翻轉 */
+    transform-origin: left center; 
+    
+    /* 翻頁動畫的物理手感 */
+    transition: transform 1.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
+    
+    /* 🎯 魔法：翻轉 180 度後，背面自動隱藏 */
+    backface-visibility: hidden; 
+    background-color: #FFFFFF;
+}
+
+.slide-page img {
+    width: 100%; height: 100%;
+    object-fit: contain; 
+}
+
+/* 🎯 正在觀看的當前頁面 */
+.slide-page.active {
+    transform: rotateY(0deg);
+    opacity: 1;
+    /* 加上左側裝訂處的淡淡陰影，更像實體書 */
+    box-shadow: inset 10px 0 20px rgba(0,0,0,0.03); 
+}
+
+/* 🎯 已經翻過去的頁面 (向左翻轉 180 度) */
+.slide-page.flipped {
+    transform: rotateY(-180deg);
+    opacity: 0; 
+}
+
+/* 🎯 還沒翻到的下一頁 (在底下乖乖等著) */
+.slide-page.waiting {
+    transform: rotateY(0deg);
+    opacity: 1;
+}
+
+/* =========================================
+   下方控制列與箭頭按鈕 (排版還原設計圖)
+   ========================================= */
+.flipbook-controls {
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
-}
-
-#flipbook-image {
+    gap: 80px; /* 🎯 控制「箭頭」跟「請翻閱」文字之間的距離 */
+    margin-top: 20px;
     width: 100%;
-    height: 100%;
-    object-fit: contain;
-    transition: opacity 0.3s ease-in-out; /* 圖片切換時的淡入淡出動畫 */
 }
 
-/* --- 下方控制列排版 --- */
-.flipbook-controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 60%; /* 讓左右箭頭稍微往內收，看起來比較集中 */
-}
-
-/* --- 左右箭頭按鈕容器 --- */
 .flip-btn {
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 10px; /* 增加點擊範圍 */
+    padding: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-/* --- 自訂箭頭圖片設定 --- */
 .flip-btn img {
-    width: 60px; /* 🎯 決定箭頭圖片的寬度，你可以依據喜好微調 */
+    width: 45px; /* 🎯 關鍵：把箭頭縮小到 45px，看起來更精緻 */
     height: auto;
-    object-fit: contain;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition: transform 0.2s ease;
 }
 
-/* 滑鼠碰到時，箭頭圖片微微放大並稍微加深/亮 (增加互動感) */
 .flip-btn:hover:not(.disabled) img {
-    transform: scale(1.15); 
-    /* 如果你想讓箭頭 hover 時變色，也可以用 CSS filter 稍微改變亮度或對比 */
+    transform: scale(1.15); /* 滑鼠碰到微放大 */
 }
 
-/* 第一頁或最後一頁時，將按鈕整組反灰並停用 */
 .flip-btn.disabled {
     opacity: 0.2;
     cursor: not-allowed;
 }
 
-/* --- 中間「請翻閱」文字 --- */
 .flip-text {
     font-size: 1.1rem;
-    font-weight: 900; /* 使用粗體 */
+    font-weight: 900; 
     color: #4A4A4A;
-    letter-spacing: 4px; /* 字距拉開一點比較有設計感 */
+    letter-spacing: 4px; 
 }
 
 /* 📱 手機版 RWD 微調 */
-@media (max-width: 768px) {
-    .flipbook-wrapper { width: 90%; }
-    .flipbook-controls { width: 90%; }
-    .flip-btn { font-size: 1.5rem; }
+@media (max-width: 900px) {
+    .flipbook-wrapper { width: 85%; }
+    .flipbook-controls { gap: 40px; } /* 手機上間距縮小 */
+    .flip-btn img { width: 35px; } /* 手機上箭頭再小一點 */
 }
 /* =========================================
    左下角：智慧返回按鈕 (回到首頁/圖標總覽)

@@ -6,17 +6,16 @@
     <title>拍貼預覽與下載</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
-    <style>
-        /* 🚨 修復關鍵 1：不要用 display: none，改用透明+移出畫面，強迫瀏覽器解析影片 */
+ <style>
+        /* 🚨 修復畫質模糊的關鍵：不要限制寬高！把它推到畫面外面就好 */
         #source-videos {
-            position: absolute;
+            position: fixed;
             top: -9999px;
             left: -9999px;
-            opacity: 0.01;
+            opacity: 0.001; 
             pointer-events: none;
-            overflow: hidden;
-            width: 1px;
-            height: 1px;
+            z-index: -1;
+            /* 🎯 已經把 width 和 height 刪除，讓瀏覽器乖乖用最高畫質解碼 */
         }
     </style>
 </head>
@@ -50,17 +49,31 @@
 
     <script>
 // ==========================================
-// 1. 設定與初始化
+// 1. 設定與初始化 (全新直式模板尺寸設定)
 // ==========================================
-// 🎯 原汁原味：完全退回你原本完美對齊的 8 度歪斜座標
+// 🎯 這裡是你調整「兩格拍貼」位置、大小和旋轉角度的控制台！
 const CLIP_POSITIONS = [
-    { x: 550, y: 1950, w: 1410, h: 795, rotate: 8 }, 
-    { x: 450, y: 2800, w: 1410, h: 795, rotate: 8 }  
+    // 第一格 (上面的框框)
+    { 
+        x: 400,    // 左右位置 (數字越大越往右)
+        y: 790,    // 上下位置 (數字越大越往下)
+        w: 595,    // 錄影畫面的寬度
+        h: 336,    // 錄影畫面的高度
+        rotate: 8  // 旋轉角度 (正數為順時針)
+    }, 
+    // 第二格 (下面的框框)
+    { 
+        x: 350, 
+        y: 1160, 
+        w: 595, 
+        h: 336, 
+        rotate: 8 
+    }  
 ];
 
 const canvas = document.getElementById('resultCanvas');
 const ctx = canvas.getContext('2d', { alpha: false }); 
-const templateVideo = document.getElementById('template-video');
+const templateVideo = document.getElementById('template-video');;
 
 // ==========================================
 // 2. 資料庫與「同步起跑」工具
@@ -137,13 +150,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         return prepareVideo(v, blob);
     });
 
-    // 🛑 等待「所有人」都抵達起跑線
+  // 🛑 等待「所有人」都抵達起跑線
     const [readyTemplate, readyClip1, readyClip2] = await Promise.all([pTemplate, pClip1, pClip2]);
     const userClips = [readyClip1, readyClip2];
 
-    // 🎯 核心退回：恢復你原始 4K 座標系統的畫布大小設定！
-    canvas.width = templateVideo.videoWidth || 2160;
-    canvas.height = templateVideo.videoHeight || 3840;
+    // 🎯 畫質保證：不再依賴影片載入狀態，強制給予 1080x1920 高清直式尺寸！
+    canvas.width = 1080;
+    canvas.height = 1920;
 
     // 🛑 全部歸零，同時按下播放鍵
     [templateVideo, readyClip1, readyClip2].forEach(v => {
@@ -154,24 +167,58 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     render(); 
-    startCanvasRecording(); 
+    startCanvasRecording();
 
-    function render() {
+function render() {
+        if (templateVideo && templateVideo.paused) templateVideo.play().catch(e=>{});
+        userClips.forEach(v => {
+            if (v && v.paused && v.videoWidth > 0) v.play().catch(e=>{});
+        });
+
         ctx.fillStyle = '#FFFFFF'; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         userClips.forEach((v, index) => {
             const pos = CLIP_POSITIONS[index];
             if (v && v.videoWidth > 0) {
-                // 原汁原味直接畫上去，不做任何多餘的縮放干擾！
                 try { drawVideo(ctx, v, pos.x, pos.y, pos.w, pos.h, pos.rotate); } catch(e) {}
             }
         });
         
-        // 畫上最外層的透明模板 (確保在最上方)
-        if (templateVideo.readyState >= 2 && templateVideo.videoWidth > 0) {
-            try { ctx.drawImage(templateVideo, 0, 0, canvas.width, canvas.height); } catch(e) {}
-        }
+        try {
+            if (templateVideo && templateVideo.videoWidth > 0) {
+                ctx.drawImage(templateVideo, 0, 0, canvas.width, canvas.height);
+            }
+        } catch(e) {}
+
+        // ==========================================
+        // 🚀 新增：將使用者名字畫在模板的指定位置
+        // ==========================================
+        const userName = localStorage.getItem('user_name') || '玩家';
+        
+        ctx.save();
+        
+        // 🎯 1. 座標定位 (X, Y)
+        // Canvas 的總大小是 1080 x 1920。
+        // 這裡是我預估的座標，如果名字太偏左就加大 X，太偏下就減小 Y
+        ctx.translate(260, 250); 
+        
+        // 🎯 2. 傾斜角度 (配合模板紙張的斜度)
+        // 負數代表逆時針旋轉。這裡預估紙張大約傾斜了 -6 度
+        ctx.rotate(-6 * Math.PI / 180); 
+        
+        // 🎯 3. 設定字體、粗細、大小
+        ctx.font = "500 35px 'LINE Seed TW', sans-serif"; 
+        
+        // 🎯 4. 設定顏色 (使用你們品牌的深灰色)
+        ctx.fillStyle = "#4A4A4A"; 
+        
+        // 把文字畫出來
+        ctx.fillText(userName, 0, 0);
+        
+        ctx.restore();
+        // ==========================================
+
         requestAnimationFrame(render);
     }
 });
@@ -195,7 +242,7 @@ function drawVideo(ctx, video, x, y, width, height, degrees) {
         sx = 0; sy = (video.videoHeight - sh) / 2;
     }
     
-    ctx.scale(-1, 1); // 鏡像翻轉
+   
     ctx.drawImage(video, sx, sy, sw, sh, -width/2, -height/2, width, height);
     ctx.restore();
 }

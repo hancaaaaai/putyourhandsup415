@@ -329,6 +329,33 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 });
+
+// ==========================================
+// 12. 第七區域：滑到時自動播放現況動畫與打字機
+// ==========================================
+window.addEventListener('DOMContentLoaded', () => {
+    const statusVideo = document.getElementById('status-video');
+    const statusTitle = document.getElementById('status-title'); // 🎯 抓取文字區塊
+    
+    if (statusVideo) {
+        const statusObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // 進入畫面：播放影片、加上 is-active 啟動打字動畫
+                    statusVideo.play().catch(e => console.log("影片播放失敗:", e));
+                    if (statusTitle) statusTitle.classList.add('is-active');
+                } else {
+                    // 離開畫面：暫停影片、移除 is-active (這樣下次滑下來才會重新打字)
+                    statusVideo.pause();
+                    statusVideo.currentTime = 0;
+                    if (statusTitle) statusTitle.classList.remove('is-active');
+                }
+            });
+        }, { threshold: 0.5 });
+
+        statusObserver.observe(statusVideo);
+    }
+});
 // ==========================================
 // 8. 最終結果與資料儲存 (圖片疊加版)
 // ==========================================
@@ -677,13 +704,65 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 2. 讓滑鼠滾輪在下半部橫向滑動 (保留你原本的設定不變)
+   // 🎯 2. 讓滑鼠在下半部可以「點擊並拖曳」橫向滑動 + 遮罩提示邏輯
     const iconSelector = document.getElementById('icon-selector');
+    const dragOverlay = document.getElementById('drag-overlay'); // 抓取新遮罩
+    let hideOverlayTimeout; // 用來存 3 秒計時器
+
     if (iconSelector) {
-        iconSelector.addEventListener('wheel', (evt) => {
-            evt.preventDefault(); 
-            iconSelector.scrollLeft += evt.deltaY;
-        }, { passive: false });
+        // --- 新增：當滑到圖標區域時，啟動 3 秒自動消失計時器 ---
+        if (dragOverlay) {
+            const overlayObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // 看到區域後，倒數 3 秒就隱藏
+                        hideOverlayTimeout = setTimeout(() => {
+                            dragOverlay.style.opacity = '0';
+                        }, 3000);
+                        overlayObserver.unobserve(entry.target); // 只觸發一次
+                    }
+                });
+            }, { threshold: 0.5 });
+            overlayObserver.observe(iconSelector);
+        }
+
+        // --- 原本的滑鼠拖曳邏輯 ---
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        // 當滑鼠按下去時
+        iconSelector.addEventListener('mousedown', (e) => {
+            isDown = true;
+            startX = e.pageX - iconSelector.offsetLeft;
+            scrollLeft = iconSelector.scrollLeft;
+
+            // 🎯 新增：如果使用者提早滑鼠按下去拖曳，馬上隱藏遮罩並取消 3 秒計時
+            if (dragOverlay) {
+                clearTimeout(hideOverlayTimeout);
+                dragOverlay.style.opacity = '0';
+            }
+        });
+
+        // 當滑鼠離開該區塊範圍時
+        iconSelector.addEventListener('mouseleave', () => { isDown = false; });
+        // 當滑鼠放開時
+        iconSelector.addEventListener('mouseup', () => { isDown = false; });
+
+        // 當滑鼠移動時 (執行拖曳)
+        iconSelector.addEventListener('mousemove', (e) => {
+            if (!isDown) return; 
+            e.preventDefault(); 
+            const x = e.pageX - iconSelector.offsetLeft;
+            const walk = (x - startX) * 1.5; 
+            iconSelector.scrollLeft = scrollLeft - walk;
+        });
+
+        // 防止拖曳到裡面的圖片時，觸發瀏覽器預設的「拖曳圖片」行為
+        const icons = iconSelector.querySelectorAll('img');
+        icons.forEach(icon => {
+            icon.addEventListener('dragstart', (e) => e.preventDefault());
+        });
     }
 });
 // ==========================================
@@ -694,41 +773,42 @@ window.addEventListener('DOMContentLoaded', () => {
         const specSection = document.getElementById('spec-section');
         const gridLines = document.querySelectorAll('.grid-line');
         const specDiagram = document.getElementById('spec-diagram');
-        const specWebm = document.getElementById('spec-webm'); // 🎯 抓取 Webm 影片
+        const specWebm = document.getElementById('spec-webm'); 
 
         if (specSection && gridLines.length > 0) {
             
             // ----------------------------------------
-            // 動畫 1：畫線與圖片淡入 (維持你喜歡的設定)
+            // 動畫 1：畫線與圖片淡入 (自動播放)
             // ----------------------------------------
             const tl = gsap.timeline({ paused: true });
 
             tl.to(gridLines, {
                 strokeDashoffset: 0,
-                duration: 5,
-                stagger: 0.2,
+                // 🎯 修改 1：將原本的 5 秒改成 1.5 秒，線就會畫得非常俐落快速！
+                duration: 1.5,   
+                stagger: 0.1,  // 這裡的 0.1 是每條線出發的間隔時間
                 ease: "power2.out"
             });
 
             if (specDiagram) {
-                tl.to(specDiagram, { opacity: 1, duration: 1.5, ease: "power2.inOut" }, "-=2.5");
-                tl.to(gridLines, { opacity: 0, duration: 1.5, ease: "power2.inOut" }, "<");
+                // 讓方格圖在線畫完前 0.5 秒就開始淡入
+                tl.to(specDiagram, { opacity: 1, duration: 1, ease: "power2.inOut" }, "-=0.5");
+                tl.to(gridLines, { opacity: 0, duration: 1, ease: "power2.inOut" }, "<");
             }
 
-            // 🎯 讓影片跟方格圖一起淡入 (魔法符號 "<" 代表同時執行)
             if (specWebm) {
-                tl.to(specWebm, { opacity: 1, duration: 1.5, ease: "power2.inOut" }, "<");
+                tl.to(specWebm, { opacity: 1, duration: 1, ease: "power2.inOut" }, "<");
             }
 
             ScrollTrigger.create({
                 trigger: specSection,
-                start: "top 50%", 
+                start: "top 60%", 
                 onEnter: () => tl.play(),
                 onLeaveBack: () => tl.progress(0).pause()
             });
 
            // ----------------------------------------
-            // 動畫 2：畫面釘住與滾輪控制影片 (效能優化版)
+            // 動畫 2：畫面釘住與滾輪控制影片
             // ----------------------------------------
             if (specWebm) {
                 specWebm.load(); 
@@ -736,23 +816,25 @@ window.addEventListener('DOMContentLoaded', () => {
                 const setupVideoScrub = () => {
                     let vidDuration = specWebm.duration || 1; 
 
-                    gsap.to(specWebm, {
-                        currentTime: vidDuration,
-                        ease: "none",
+                    // 🎯 修改 2：我們把原本的單一動畫，變成一個 Timeline (時間軸)
+                    const scrubTl = gsap.timeline({
                         scrollTrigger: {
                             trigger: specSection,
                             start: "top top",
-                            end: "+=150%",
-                            // 🎯 調整 scrub 值：
-                            // 如果覺得太卡，可以嘗試 0.5 到 1 之間的值。
-                            // 0 代表完全即時（最吃效能），1 以上代表平滑但有延遲感。
+                            end: "+=200%", // 增加滾動長度，讓後面的滑動更有餘裕
                             scrub: 0.5, 
                             pin: true,
-                            // ⚡ 效能開關：增加滾動偵測的精準度
                             fastScrollEnd: true,
                             preventOverlaps: true
                         }
                     });
+
+                    // 🎯 魔法在這裡：
+                    // 我們塞入一個 duration: 0.5 的「空白動畫」當作緩衝。
+                    // 這樣當畫面剛釘住時，使用者前 20% 的滾動距離是「空轉」的，
+                    // 剛好讓影片有時間完全淡入。繼續往下滾，影片才會開始播放 (duration: 2)！
+                    scrubTl.to({}, { duration: 0.5 }) 
+                           .to(specWebm, { currentTime: vidDuration, duration: 2, ease: "none" });
                 };
 
                 if (specWebm.readyState >= 1) {
@@ -776,81 +858,92 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 // ==========================================
-// 第十三區域：翻頁手冊邏輯
+// 第十三區域：專屬單頁翻閱閱讀器 (日曆疊加版)
 // ==========================================
 window.addEventListener('DOMContentLoaded', () => {
-    // 1. 設定所有手冊圖片的路徑 (1 到 7)
-    const manualPages = [
-        'JPG/圖標規範手冊01.jpg',
-        'JPG/圖標規範手冊02.jpg',
-        'JPG/圖標規範手冊03.jpg',
-        'JPG/圖標規範手冊04.jpg',
-        'JPG/圖標規範手冊05.jpg',
-        'JPG/圖標規範手冊06.jpg',
-        'JPG/圖標規範手冊07.jpg'
-    ];
-    
-    let currentPage = 0; // 預設停留在第一頁 (陣列索引 0)
-
-    const flipImage = document.getElementById('flipbook-image');
+    const track = document.getElementById('slider-track');
     const prevBtn = document.getElementById('prev-page-btn');
     const nextBtn = document.getElementById('next-page-btn');
+    const slides = document.querySelectorAll('.slide-page');
 
-    // 2. 預載圖片，防止翻頁時出現空白閃爍
-    manualPages.forEach(src => {
-        const img = new Image();
-        img.src = src;
-    });
+    if (track && prevBtn && nextBtn && slides.length > 0) {
+        let currentIndex = 0;
+        const totalSlides = slides.length;
 
-    // 3. 更新畫面的主函式
-    const updateFlipbook = () => {
-        if (!flipImage) return;
+       // 🎯 1. 核心翻頁功能 (3D 版)
+        const updateSlider = () => {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active', 'flipped', 'waiting');
+                
+                // 🎯 全新加入的圖層魔法：
+                // 總頁數減去索引值，確保第 1 頁在最上層，第 7 頁在最下層
+                slide.style.zIndex = totalSlides - index;
 
-        // 步驟 A：先將透明度設為 0 (淡出)
-        flipImage.style.opacity = 0;
+                if (index < currentIndex) {
+                    // 已經翻過去的頁面
+                    slide.classList.add('flipped');
+                } else if (index === currentIndex) {
+                    // 正在看的頁面
+                    slide.classList.add('active');
+                } else {
+                    // 還沒看的頁面
+                    slide.classList.add('waiting');
+                }
+            });
 
-        // 步驟 B：等 300 毫秒 (配合 CSS 的 transition 時間) 後替換圖片並淡入
-        setTimeout(() => {
-            flipImage.src = manualPages[currentPage];
-            
-            // 確保圖片載入完成才顯示
-            flipImage.onload = () => {
-                flipImage.style.opacity = 1;
-            };
-        }, 300);
+            // 更新左右箭頭的灰階狀態
+            if (currentIndex === 0) prevBtn.classList.add('disabled');
+            else prevBtn.classList.remove('disabled');
 
-        // 步驟 C：更新按鈕的可用狀態
-        if (currentPage === 0) {
-            prevBtn.classList.add('disabled');
-        } else {
-            prevBtn.classList.remove('disabled');
-        }
+            if (currentIndex === totalSlides - 1) nextBtn.classList.add('disabled');
+            else nextBtn.classList.remove('disabled');
+        };
 
-        if (currentPage === manualPages.length - 1) {
-            nextBtn.classList.add('disabled');
-        } else {
-            nextBtn.classList.remove('disabled');
-        }
-    };
-
-    // 4. 綁定左右按鈕點擊事件
-    if (prevBtn && nextBtn) {
+        // 🎯 2. 綁定左右按鈕
         prevBtn.addEventListener('click', () => {
-            if (currentPage > 0) {
-                currentPage--;
-                updateFlipbook();
-            }
+            if (currentIndex > 0) { currentIndex--; updateSlider(); }
+        });
+        nextBtn.addEventListener('click', () => {
+            if (currentIndex < totalSlides - 1) { currentIndex++; updateSlider(); }
         });
 
-        nextBtn.addEventListener('click', () => {
-            if (currentPage < manualPages.length - 1) {
-                currentPage++;
-                updateFlipbook();
-            }
+        // 🎯 3. 綁定滑鼠拖曳 (Swipe) 手勢 (更輕量的判斷)
+        let startX = 0;
+        let isDragging = false;
+
+        track.addEventListener('mousedown', (e) => {
+            startX = e.pageX;
+            isDragging = true;
         });
+
+        const endDrag = (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const diff = e.pageX - startX;
+            // 只要往左滑超過 50px，就翻下一頁
+            if (diff < -50 && currentIndex < totalSlides - 1) {
+                currentIndex++;
+                updateSlider();
+            } 
+            // 只要往右滑超過 50px，就翻上一頁
+            else if (diff > 50 && currentIndex > 0) {
+                currentIndex--;
+                updateSlider();
+            }
+        };
+
+        track.addEventListener('mouseup', endDrag);
+        track.addEventListener('mouseleave', endDrag);
+
+        // 防止拖曳時不小心反白圖片
+        const imgs = track.querySelectorAll('img');
+        imgs.forEach(img => img.addEventListener('dragstart', e => e.preventDefault()));
+
+        // 初始化第一次顯示
+        updateSlider();
     }
 });
-
 // ==========================================
 // 17. 全域導覽列與 LOGO 顯示/隱藏控制
 // ==========================================
@@ -922,7 +1015,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     const absoluteTop = spacer.getBoundingClientRect().top + window.scrollY;
                     
                     // 真正的起點 + 往下滾動 2 個螢幕高 = 圖標總覽出現的完美位置
-                    const targetY = absoluteTop + (window.innerHeight * 2);
+                    const targetY = absoluteTop + (window.innerHeight * 3);
                     
                     window.scrollTo({ 
                         top: targetY, 
@@ -962,7 +1055,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 const wrapperTop = spacer.getBoundingClientRect().top + scrollY;
 
                 // 算好的圖標總覽完美定位點 (跟導覽列跳轉的公式一樣)
-                const overviewTargetY = wrapperTop + (windowHeight * 2);
+                const overviewTargetY = wrapperTop + (windowHeight * 3);
                 
                 // 圖標規範區塊的開頭
                 const specTop = specSection.getBoundingClientRect().top + scrollY;
@@ -997,7 +1090,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 if (wrapper) {
                     const spacer = wrapper.closest('.pin-spacer') || wrapper;
                     const wrapperTop = spacer.getBoundingClientRect().top + window.scrollY;
-                    const targetY = wrapperTop + (window.innerHeight * 2);
+                    const targetY = wrapperTop + (window.innerHeight * 3);
                     window.scrollTo({ top: targetY, behavior: 'smooth' });
                 }
             }
@@ -1048,6 +1141,115 @@ window.addEventListener('DOMContentLoaded', () => {
                     quizState.qIndex--;
                     renderQuestion();
                 }
+            }
+        });
+    }
+});
+
+// ==========================================
+// 21. 導覽列滾動連動亮起 (Scroll Spy)
+// ==========================================
+window.addEventListener('DOMContentLoaded', () => {
+    const navItems = document.querySelectorAll('.navbar .nav-item');
+    
+    window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY;
+        const windowHeight = window.innerHeight;
+        
+        let activeIndex = 0; // 預設 0 是「首頁」
+
+        // 1. 判斷是否抵達「關於我們」
+        const whatIsSection = document.getElementById('what-is-section');
+        if (whatIsSection) {
+            const whatIsTop = whatIsSection.getBoundingClientRect().top + scrollY;
+            // 當畫面滑到該區塊的上方 30% 處，就讓它亮起
+            if (scrollY >= whatIsTop - (windowHeight * 0.3)) {
+                activeIndex = 1; 
+            }
+        }
+
+        // 2. 判斷是否抵達「圖標總覽」(因為有 GSAP 動畫，抓取點較特殊)
+        const wrapper = document.getElementById('horizontal-track-wrapper');
+        if (wrapper) {
+            const spacer = wrapper.closest('.pin-spacer') || wrapper;
+            const wrapperTop = spacer.getBoundingClientRect().top + scrollY;
+            // 根據之前的精準跳轉公式，圖標總覽的完美定位點是 wrapperTop + 2個螢幕高
+            // 只要滑過 1.5 個螢幕高，我們就提早讓它亮起藍色
+            if (scrollY >= wrapperTop + (windowHeight * 2.5)) {
+                activeIndex = 2;
+            }
+        }
+
+        // 3. 更新導覽列樣式
+        navItems.forEach((item, index) => {
+            // 第 3 個索引是「手語名字」(外連網頁)，我們不讓它在首頁滑動時亮起
+            if (index === 3) return; 
+
+            if (index === activeIndex) {
+                item.classList.add('active'); // 亮起亮藍色
+            } else {
+                item.classList.remove('active'); // 變回深灰色
+            }
+        });
+    });
+});
+// ==========================================
+// 🎯 第五區域：客群文字自動淡入與離開隱藏觸發器
+// ==========================================
+window.addEventListener('DOMContentLoaded', () => {
+    const audienceSection = document.getElementById('target-audience-section');
+    const audienceVideo = document.getElementById('audience-video');
+    
+    if (audienceSection) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // 🚀 進入區塊：加上標籤，觸發 CSS 淡入
+                    audienceSection.classList.add('is-active');
+                    
+                    // 同步播放影片
+                    if (audienceVideo) audienceVideo.play().catch(e => console.log(e));
+                } else {
+                    // 🍂 離開區塊：移除標籤，觸發 CSS 淡出 (隱藏)
+                    audienceSection.classList.remove('is-active');
+                    
+                    // 離開時暫停影片並重置，節省電腦效能
+                    if (audienceVideo) {
+                        audienceVideo.pause();
+                        audienceVideo.currentTime = 0;
+                    }
+                }
+            });
+        }, { threshold: 0.3 }); // 螢幕看到 30% 時觸發
+
+        observer.observe(audienceSection);
+    }
+});
+
+// ==========================================
+// 🎯 22. 第九區右下角：「瀏覽所有圖標」按鈕跳轉
+// ==========================================
+window.addEventListener('DOMContentLoaded', () => {
+    const goToOverviewBtn = document.getElementById('go-to-overview-btn');
+    
+    if (goToOverviewBtn) {
+        goToOverviewBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const wrapper = document.getElementById('horizontal-track-wrapper');
+            
+            if (wrapper) {
+                // 抓取 GSAP 的隱形外框
+                const spacer = wrapper.closest('.pin-spacer') || wrapper;
+                const absoluteTop = spacer.getBoundingClientRect().top + window.scrollY;
+                
+                // 🎯 套用我們之前算好的完美距離：3 個螢幕高
+                const targetY = absoluteTop + (window.innerHeight * 3); 
+                
+                // 平滑滾動過去 (會觸發 GSAP 的橫向動畫)
+                window.scrollTo({ 
+                    top: targetY, 
+                    behavior: 'smooth' 
+                });
             }
         });
     }
