@@ -418,12 +418,19 @@ function startRecordingSequence(onComplete, stepNumber) {
             clearInterval(countdownTimer);
             targetContainer.style.display = 'none'; 
             recIndicator.style.display = 'flex';    
-          let chunks = [];
-            let options = { mimeType: 'video/webm;codecs=vp8', videoBitsPerSecond: 8000000 };
-            if (!MediaRecorder.isTypeSupported(options.mimeType)) options.mimeType = 'video/webm';
+         let chunks = [];
+                // 🎯 優化 1：優先嘗試硬體加速的 H.264，並將碼率降至 5 Mbps 減輕負擔
+                let options = { mimeType: 'video/webm;codecs=h264', videoBitsPerSecond: 5000000 };
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    options.mimeType = 'video/webm;codecs=vp8'; 
+                }
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    options.mimeType = 'video/webm';
+                }
 
-            const stream = recordCanvas.captureStream(30);
-            const mediaRecorder = new MediaRecorder(stream, options);
+                // 🎯 優化 2：將擷取幀率提升到 60fps，讓動態更滑順
+                const stream = recordCanvas.captureStream(60);
+                const mediaRecorder = new MediaRecorder(stream, options);
 
             mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
 
@@ -471,7 +478,7 @@ function startRecordingSequence(onComplete, stepNumber) {
                 recordAnimFrame = requestAnimationFrame(drawRecordFrame);
             }
             drawRecordFrame(); 
-            mediaRecorder.start(); 
+            mediaRecorder.start(100); // 🎯 優化 3：每 100 毫秒處理一次資料，防止最後卡死
             setTimeout(() => { mediaRecorder.stop(); }, 5000);
         }
     }, 1000);

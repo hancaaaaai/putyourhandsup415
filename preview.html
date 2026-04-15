@@ -139,8 +139,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const [readyTemplate, readyClip1, readyClip2] = await Promise.all([pTemplate, pClip1, pClip2]);
     userClips = [readyClip1, readyClip2].filter(v => v !== null);
 
+   // 先啟動畫面渲染引擎
     render(); 
-    startCanvasRecording(); 
+
+    // 🎯 修復閃爍 Bug：給瀏覽器 0.5 秒的緩衝時間，確保底圖已經畫上去了
+    setTimeout(() => {
+        // 錄影前，把所有影片強制拉回 0 秒，確保大家完美同步起跑
+        if (templateVideo) templateVideo.currentTime = 0;
+        userClips.forEach(v => { if (v) v.currentTime = 0; });
+        
+        // 畫面都準備好了，正式開始錄影！
+        startCanvasRecording(); 
+    }, 500);
 
     function render() {
         ctx.fillStyle = '#FFFFFF'; 
@@ -166,7 +176,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ctx.save();
 
         // 💡 1. 在這裡調整「位置」
-        const textX = 300; // 左右 (數字越大越靠右)
+        const textX = 250; // 左右 (數字越大越靠右)
         const textY = 250; // 上下 (數字越大越靠下)
         
         // 💡 2. 在這裡調整「旋轉角度」
@@ -205,9 +215,17 @@ function drawVideo(ctx, video, x, y, width, height, degrees) {
 }
 
 function startCanvasRecording() {
-    const stream = canvas.captureStream(30);
-    let options = { mimeType: 'video/webm;codecs=vp8', videoBitsPerSecond: 8000000 };
-    if (!MediaRecorder.isTypeSupported(options.mimeType)) options.mimeType = 'video/webm';
+    // 🎯 優化 1：將擷取幀率提升到 60fps
+    const stream = canvas.captureStream(60);
+    
+    // 🎯 優化 2：優先嘗試硬體加速的 H.264，碼率降至 5 Mbps
+    let options = { mimeType: 'video/webm;codecs=h264', videoBitsPerSecond: 5000000 };
+    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options.mimeType = 'video/webm;codecs=vp8';
+    }
+    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options.mimeType = 'video/webm';
+    }
     
     const recorder = new MediaRecorder(stream, options);
     const chunks = [];
@@ -234,8 +252,8 @@ function startCanvasRecording() {
             }
         } catch (error) { console.error(error); qrContainer.innerHTML = '<span style="color:red;">網路錯誤</span>'; }
     };
-    recorder.start();
-    setTimeout(() => { recorder.stop(); }, 11500); 
+    recorder.start(100); // 🎯 優化 3：分段處理，減輕 CPU 負擔
+    setTimeout(() => { recorder.stop(); }, 9800);
 }
     </script>
 </body>
