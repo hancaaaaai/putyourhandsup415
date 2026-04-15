@@ -37,7 +37,7 @@
 
             <div class="preview-btn-group">
                 <button class="res-btn outline-btn" onclick="window.location.href='booth-duo-ipad.html'">重新拍攝</button>
-                <button class="res-btn solid-btn" onclick="window.location.href='message.html'">來留言吧！</button>
+                <button class="res-btn solid-btn" onclick="window.location.href='guestbook.html'">來留言吧！</button>
             </div>
             
         </div>
@@ -45,13 +45,14 @@
 
     <div id="source-videos">
         <video id="template-video" loop muted playsinline crossorigin="anonymous"></video>
-        <video id="char-video" loop muted playsinline crossorigin="anonymous"></video>
+        
     </div>
 
     <script>
 // ==========================================
 // 1. 設定與初始化
 // ==========================================
+// 🎯 原汁原味：完全退回你原本完美對齊的 8 度歪斜座標
 const CLIP_POSITIONS = [
     { x: 550, y: 1950, w: 1410, h: 795, rotate: 8 }, 
     { x: 450, y: 2800, w: 1410, h: 795, rotate: 8 }  
@@ -60,7 +61,6 @@ const CLIP_POSITIONS = [
 const canvas = document.getElementById('resultCanvas');
 const ctx = canvas.getContext('2d', { alpha: false }); 
 const templateVideo = document.getElementById('template-video');
-const charVideo = document.getElementById('char-video'); // 🎯 抓取小人影片
 
 // ==========================================
 // 2. 資料庫與「同步起跑」工具
@@ -87,12 +87,17 @@ function prepareVideo(videoEl, srcData) {
         videoEl.playsInline = true;
         videoEl.autoplay = true; 
 
+        // 🚨 確保讀到真實畫面，解決模板變透明消失的問題
         videoEl.onloadeddata = () => {
             videoEl.pause(); 
             resolve(videoEl);
         };
         
-        videoEl.onerror = () => resolve(videoEl); 
+        // 如果檔名打錯會跳警告
+        videoEl.onerror = () => {
+            console.error("🚨 找不到模板影片！請檢查資料夾與檔名：", srcData);
+            resolve(videoEl);
+        };
 
         if (typeof srcData === 'string') {
             videoEl.src = srcData;
@@ -100,7 +105,7 @@ function prepareVideo(videoEl, srcData) {
             videoEl.src = URL.createObjectURL(srcData);
         }
         
-        setTimeout(() => resolve(videoEl), 3000); 
+        setTimeout(() => resolve(videoEl), 5000); 
     });
 }
 
@@ -115,21 +120,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     qrContainer.innerHTML = '<span style="color:#aaa; font-size: 1rem; font-weight: bold;">準備影片中...</span>';
 
-    // 🎯 建立個性對應表，用來抓取教學影片
-    const ROLE_TO_CATEGORY = {
-        '淘氣':'外向活力','活潑':'外向活力','幽默':'外向活力','大方':'外向活力',
-        '冷靜':'內向安靜','文靜':'內向安靜','沉穩':'內向安靜','害羞':'內向安靜',
-        '溫柔':'關懷溫暖','善良':'關懷溫暖','耐心':'關懷溫暖','樂觀':'關懷溫暖',
-        '勇敢':'果斷堅強','自信':'果斷堅強','果斷':'果斷堅強','獨立':'果斷堅強',
-        '敏銳':'敏銳理性','細心':'敏銳理性','聰明':'敏銳理性','謹慎':'敏銳理性'
-    };
-    const trait = role.substring(0, 2);
-    const gender = role.substring(2, 3);
-    const category = ROLE_TO_CATEGORY[trait] || '外向活力';
-
-    // 🛑 同時平行載入這 4 支影片 (包含小人)
+    // 🎯 正確讀取你剛改好的檔名
     const pTemplate = prepareVideo(templateVideo, `photo/${role}_拍照模板.webm`);
-    const pChar = prepareVideo(charVideo, `booth/${category}_${gender}.webm`); // 🎯 載入小人
     
     const pClip1 = getBlobFromDB('clip_1').then(blob => {
         if(!blob) return null;
@@ -146,15 +138,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // 🛑 等待「所有人」都抵達起跑線
-    const [readyTemplate, readyClip1, readyClip2, readyChar] = await Promise.all([pTemplate, pClip1, pClip2, pChar]);
+    const [readyTemplate, readyClip1, readyClip2] = await Promise.all([pTemplate, pClip1, pClip2]);
     const userClips = [readyClip1, readyClip2];
 
-    // 設定畫布尺寸
-    canvas.width = templateVideo.videoWidth || 1080;
-    canvas.height = templateVideo.videoHeight || 1920;
+    // 🎯 核心退回：恢復你原始 4K 座標系統的畫布大小設定！
+    canvas.width = templateVideo.videoWidth || 2160;
+    canvas.height = templateVideo.videoHeight || 3840;
 
-    // 🛑 全部歸零，同時按下播放鍵！
-    [templateVideo, readyClip1, readyClip2, readyChar].forEach(v => {
+    // 🛑 全部歸零，同時按下播放鍵
+    [templateVideo, readyClip1, readyClip2].forEach(v => {
         if (v && v.videoWidth > 0) {
             v.currentTime = 0; 
             v.play().catch(e=>console.log(e));
@@ -171,24 +163,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         userClips.forEach((v, index) => {
             const pos = CLIP_POSITIONS[index];
             if (v && v.videoWidth > 0) {
+                // 原汁原味直接畫上去，不做任何多餘的縮放干擾！
                 try { drawVideo(ctx, v, pos.x, pos.y, pos.w, pos.h, pos.rotate); } catch(e) {}
             }
         });
-
-        // 🎯 畫上教學小人 (放在使用者上方、透明模板下方)
-        if (readyChar && readyChar.videoWidth > 0) {
-            try { 
-                // ⚠️ 如果小人位置或大小不對，請直接改這四個數字！
-                const charW = 600;  // 寬度
-                const charH = 1000; // 高度
-                const charX = 50;   // X 座標 (左到右)
-                const charY = 850;  // Y 座標 (上到下)
-                
-                ctx.drawImage(readyChar, charX, charY, charW, charH); 
-            } catch(e) {}
-        }
         
-        if (templateVideo.videoWidth > 0) {
+        // 畫上最外層的透明模板 (確保在最上方)
+        if (templateVideo.readyState >= 2 && templateVideo.videoWidth > 0) {
             try { ctx.drawImage(templateVideo, 0, 0, canvas.width, canvas.height); } catch(e) {}
         }
         requestAnimationFrame(render);
@@ -234,7 +215,7 @@ function startCanvasRecording() {
     const finalBlob = new Blob(chunks, { type: mimeType });
     const qrContainer = document.getElementById('ui-qrcode');
     
-    qrContainer.innerHTML = '<span style="color:#aaa; font-size: 1rem; font-weight: bold; text-align: center;">雲端生成中...</span>';
+    qrContainer.innerHTML = '<span style="color:#aaa; font-size: 1rem; font-weight: bold; text-align: center;">雲端轉檔中<br>請稍候約 3 秒...</span>';
     
     const cloudName = 'dz8vnxfts'; 
     const uploadPreset = 'put your hands up';
@@ -275,7 +256,6 @@ function startCanvasRecording() {
 };
     
     recorder.start();
-    // 錄製 11.5 秒
     setTimeout(() => { recorder.stop(); }, 11500); 
 }
     </script>

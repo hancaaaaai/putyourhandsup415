@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>20種結果留言牆</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+  /* === 自訂鼠標樣式 === */
+  body, button, input, .person, .zone, .ui-layer { 
+    cursor: none !important; 
+  }
+
+  #fake-cursor {
+    width: 100px; 
+    height: 100px;
+    position: fixed; top: 0; left: 0; 
+    pointer-events: none; z-index: 99999; will-change: transform;
+  }
+  
+  #fake-cursor-img {
+    width: 100%; height: 100%;
+    background-image: url('PNG/cursor.png'); 
+    background-size: contain; background-repeat: no-repeat;
+    transform-origin: center 80%;
+  }
+  
+  #fake-cursor.is-clicking #fake-cursor-img {
+    background-image: url('PNG/cursor-click.png'); 
+    transform: rotate(-5deg);
+  }
+
+  * { box-sizing: border-box; }
+  body { 
+    font-family: "Manrope", "Noto Sans TC", sans-serif; 
+    margin: 0; padding: 0; 
+    background: #f0f0f0; 
+    height: 100vh; width: 100vw;
+    overflow: hidden; 
+  }
+
+  /* === 主容器 === */
+  .viewport {
+    width: 100%; height: 100%;
+    position: relative;
+    background-color: #fdfbf7;
+    background-image: radial-gradient(#ddd 1px, transparent 1px);
+    background-size: 30px 30px;
+    display: flex; justify-content: center; align-items: center; 
+    padding-bottom: 120px; 
+  }
+
+  /* === 廣場網格 === */
+  .plaza {
+    width: 95vw; height: 80vh; 
+    display: grid; 
+    grid-template-columns: repeat(5, 1fr); 
+    grid-template-rows: repeat(4, 1fr);
+    gap: 12px; 
+  }
+
+  /* === 區域樣式 === */
+  .zone {
+    position: relative;
+    border: 1px dashed rgba(0,0,0,0.15); 
+    border-radius: 12px;
+    background: rgba(255,255,255,0.4);
+    transition: all 0.2s;
+  }
+  .zone:hover { 
+    background: rgba(255,255,255,0.8); 
+    border-color: rgba(0,0,0,0.3);
+  }
+  .zone-label {
+    position: absolute; 
+    font-size: 16px; font-weight: 900; color: #555; opacity: 0.4;
+    bottom: 8px; right: 10px;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* === 小人樣式 === */
+  .person {
+    position: absolute;
+    display: flex; flex-direction: column; align-items: center;
+    width: 100px; /* 🎯 配合下方寬度調整 */
+    z-index: 10;
+    transition: transform 0.2s, z-index 0.2s;
+    cursor: pointer;
+  }
+  .person:hover { z-index: 100 !important; transform: scale(1.2); }
+
+  /* 🎯 修改點：將原本的 150px 縮小為 100px，減輕效能負擔 */
+  .avatar-video-box {
+    width: 100px; height: 100px; 
+    background: transparent; 
+    border: none; 
+    border-radius: 0; 
+    box-shadow: none; 
+    display: flex; justify-content: center; align-items: center;
+    position: relative;
+    overflow: visible; 
+  }
+  
+  /* 影片本體 */
+  .avatar-video-box video {
+    width: 100%; height: 100%;
+    object-fit: contain; 
+    transform: scale(1); 
+  }
+
+  .bubble {
+    background: #fff; padding: 4px 8px; border-radius: 8px;
+    font-size: 13px; font-weight: 700; color: #333;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 0px; 
+    position: relative;
+    max-width: 120px; 
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    opacity: 0.95;
+    text-align: center;
+  }
+  .person:hover .bubble { white-space: normal; overflow: visible; z-index: 101; min-width: 90px;}
+  .bubble::after {
+    content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
+    border-width: 4px 4px 0; border-style: solid; border-color: #fff transparent transparent;
+  }
+
+  /* === UI 固定層 === */
+  .ui-layer {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 500;
+  }
+  .ui-layer > * { pointer-events: auto; }
+
+  .input-bar {
+    position: absolute; bottom: 0; left: 0; width: 100%; 
+    height: 120px;
+    background: rgba(255,255,255,0.9); padding: 0 40px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+    display: flex; align-items: center; gap: 20px; 
+    backdrop-filter: blur(8px);
+    border-top: 1px solid #eee;
+  }
+  
+  .role-badge { 
+    background: #333; color: #fff; padding: 8px 18px; border-radius: 30px; 
+    font-weight: bold; white-space: nowrap; font-size: 18px;
+  }
+  
+  input { 
+    flex-grow: 1; padding: 15px 25px; 
+    font-size: 24px; 
+    border: 3px solid #eee; border-radius: 60px; outline: none; 
+    height: 70px;
+  }
+  
+  button.send { 
+    padding: 15px 35px; border-radius: 60px; border: 0; 
+    background: #ffdd00; font-weight: 900; 
+    font-size: 22px; 
+    cursor: pointer; 
+  }
+  
+  button.home {
+    padding: 15px; border-radius: 50%; border: 3px solid #eee; 
+    background: #fff; cursor: pointer; 
+    font-size: 24px; 
+    width: 70px; height: 70px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  #secret-btn {
+    position: fixed; top: 0; left: 0; width: 100px; height: 100px; z-index: 9999;
+    background: transparent; cursor: default; 
+  }
+
+  /* --- 留言引導氣泡框 --- */
+  .invite-bubble {
+    position: absolute;
+    top: -70px; 
+    left: 10%;
+    transform: translateX(-50%);
+    background-color: #333; 
+    color: #fff;
+    padding: 12px 25px;
+    border-radius: 50px;
+    font-weight: 900;
+    font-size: 18px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    white-space: nowrap;
+    pointer-events: none; 
+    z-index: 600;
+    animation: floatInvite 2s ease-in-out infinite;
+  }
+
+  .invite-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -8px; 
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 10px 10px 0; 
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+  }
+
+  @keyframes floatInvite {
+    0%, 100% { transform: translate(-50%, 0); }
+    50% { transform: translate(-50%, -10px); } 
+  }
+</style>
+</head>
+<body>
+
+  <div class="viewport">
+    <div class="plaza" id="plaza"></div>
+  </div>
+
+  <div id="secret-btn" onclick="handleSecretClick()"></div>
+
+  <div class="ui-layer">
+    <div class="input-bar">
+      <div class="invite-bubble">湊個熱鬧，來留言吧！</div>
+      <button class="home" onclick="location.href='index.html'">🏠</button>
+      <div class="role-badge">我是：<span id="my-role">未知</span></div>
+      
+      <input type="text" id="msg-input" placeholder="留個言吧..." maxlength="20" autocomplete="off">
+      
+      <button class="send" onclick="addMessage()">送出</button>
+    </div>
+  </div>
+  
+<div id="fake-cursor"><div id="fake-cursor-img"></div></div>
+<script>
+  // ==========================================
+  // 1. 設定：20 種結果名稱 (對應格子)
+  // ==========================================
+  const roleList = [
+    "淘氣", "幽默", "活潑", "大方",
+    "害羞", "冷靜", "文靜", "沉穩",
+    "溫柔", "善良", "耐心", "樂觀",
+    "勇敢", "自信", "果斷", "獨立",
+    "敏銳", "細心", "聰明", "謹慎"
+  ];
+
+  // 生成格子
+  const plaza = document.getElementById('plaza');
+  roleList.forEach((role, i) => {
+    const zone = document.createElement('div');
+    zone.className = 'zone';
+    zone.id = `zone-${i}`;
+    
+    const label = document.createElement('div');
+    label.className = 'zone-label';
+    label.textContent = role;
+    zone.appendChild(label);
+    plaza.appendChild(zone);
+  });
+
+  // ==========================================
+  // 2. 隱藏清空邏輯 (左上角連點 5 下清空所有留言)
+  // ==========================================
+  let secretClicks = 0;
+  let secretTimer = null;
+
+  function handleSecretClick() {
+    secretClicks++;
+    clearTimeout(secretTimer);
+    secretTimer = setTimeout(() => { secretClicks = 0; }, 500);
+
+    if(secretClicks >= 5) {
+      if(confirm('【管理員模式】\n\n確定要清空所有留言嗎？')) {
+        localStorage.removeItem('guestbook_messages');
+        alert('已清空');
+        location.reload();
+      }
+      secretClicks = 0;
+    }
+  }
+
+  // ==========================================
+  // 3. 資料與渲染
+  // ==========================================
+  const myData = JSON.parse(localStorage.getItem('photobooth_template') || '{}');
+  const myRole = myData.role || '淘氣女'; 
+  document.getElementById('my-role').textContent = myRole;
+
+  let messages = JSON.parse(localStorage.getItem('guestbook_messages') || '[]');
+
+  function renderCrowd() {
+    // 1. 重置所有格子的內容 (只保留標籤)
+    document.querySelectorAll('.zone').forEach(z => {
+      const label = z.querySelector('.zone-label');
+      z.innerHTML = ''; 
+      if(label) z.appendChild(label);
+    });
+
+    // 2. 渲染每一個留言的小人
+    messages.forEach((msg, idx) => {
+      const fullRole = msg.role; // e.g. "淘氣女"
+      const adjective = fullRole.replace(/[男女]$/, ''); // "淘氣"
+      
+      let roleIndex = roleList.indexOf(adjective);
+      if(roleIndex === -1) roleIndex = roleList.indexOf(fullRole);
+      if(roleIndex === -1) roleIndex = 19; 
+
+      const container = document.getElementById(`zone-${roleIndex}`);
+      if(!container) return;
+
+      const person = document.createElement('div');
+      person.className = `person style-0`;
+      
+      // 隨機位置計算
+      const hash = msg.text.length + idx * 113; 
+      const randX = (hash * 37 % 70) + 15; 
+      const randY = (hash * 59 % 60) + 20; 
+      
+      person.style.left = `${randX}%`;
+      person.style.top = `${randY}%`;
+      person.style.zIndex = idx + 10;
+
+      const videoSrc = `Quiz results page/${fullRole}.webm`;
+
+      person.innerHTML = `
+        <div class="bubble">${msg.text}</div>
+        <div class="avatar-video-box">
+          <video src="${videoSrc}" autoplay loop muted playsinline></video>
+        </div>
+      `;
+      container.appendChild(person);
+    });
+  }
+
+  // ==========================================
+  // 4. 輸入留言
+  // ==========================================
+  function addMessage() {
+    const input = document.getElementById('msg-input');
+    const text = input.value.trim();
+    if(!text) return;
+    
+    const newMsg = {
+      role: myRole, 
+      text: text,
+      time: new Date().toLocaleTimeString()
+    };
+    
+    messages.push(newMsg); 
+    localStorage.setItem('guestbook_messages', JSON.stringify(messages));
+    
+    input.value = '';
+    renderCrowd();
+  }
+
+  document.getElementById('msg-input').addEventListener('keypress', (e)=>{
+    if(e.key === 'Enter') addMessage();
+  });
+
+  // 啟動畫面渲染
+  renderCrowd();
+
+// === 自訂鼠標控制 ===
+  (function(){
+    const cursor = document.getElementById('fake-cursor');
+    let mouseX = -100, mouseY = -100; 
+    let curX = -100, curY = -100;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    document.addEventListener('mousedown', () => cursor.classList.add('is-clicking'));
+    document.addEventListener('mouseup', () => cursor.classList.remove('is-clicking'));
+
+    function renderCursor() {
+      curX += (mouseX - curX) * 0.2;
+      curY += (mouseY - curY) * 0.2;
+      cursor.style.transform = `translate3d(${curX}px, ${curY}px, 0)`;
+      requestAnimationFrame(renderCursor);
+    }
+    renderCursor();
+  })();
+</script>
+</body>
+</html>
