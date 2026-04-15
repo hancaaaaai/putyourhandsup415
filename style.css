@@ -37,6 +37,15 @@
     padding: 0;
     box-sizing: border-box;
     cursor: url('PNG/cursor.png'), auto !important;
+    
+    /* 🎯 加上這兩行，防止全站文字被反白選取 */
+    -webkit-user-select: none; /* 針對 Safari (iPhone/iPad) 與 Chrome */
+    user-select: none;         /* 標準寫法 */
+}
+
+input, textarea {
+    -webkit-user-select: auto !important;
+    user-select: auto !important;
 }
 
 /* 全域套用 LINE Seed TW 字體 */
@@ -847,7 +856,23 @@ html, body { -ms-overflow-style: none; scrollbar-width: none; }
     z-index: 10;
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+/* =========================================
+   修正：幽默專用「特大長方形」框框 (800px)
+   ========================================= */
+.target-box.extra-wide-box {
+    width: 800px;  /* 🚀 比原本的 550px 更長！ */
+    height: 250px;
+}
 
+.target-progress.extra-wide-progress {
+    stroke-dasharray: 1986;  /* 重新計算的超長周長 */
+    stroke-dashoffset: 1986; 
+}
+
+.target-box.counting-down .target-progress.extra-wide-progress {
+    /* 🚨 錯把 0 寫成 1986 了！請把它改成 0 */
+    stroke-dashoffset: 0 !important; 
+}
 .box-svg {
     position: absolute;
     top: 0; left: 0;

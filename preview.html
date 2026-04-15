@@ -6,16 +6,17 @@
     <title>拍貼預覽與下載</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
- <style>
-        /* 🚨 修復畫質模糊的關鍵：不要限制寬高！把它推到畫面外面就好 */
+<style>
+        /* 🚨 修復關鍵 1：千萬不要限制 width 跟 height，否則畫質與比例會崩壞！ */
         #source-videos {
-            position: fixed;
+            position: absolute;
             top: -9999px;
             left: -9999px;
-            opacity: 0.001; 
+            opacity: 0.01;
             pointer-events: none;
-            z-index: -1;
-            /* 🎯 已經把 width 和 height 刪除，讓瀏覽器乖乖用最高畫質解碼 */
+            overflow: hidden;
+            /* width: 1px;  <-- 刪除 */
+            /* height: 1px; <-- 刪除 */
         }
     </style>
 </head>
@@ -49,35 +50,22 @@
 
     <script>
 // ==========================================
-// 1. 設定與初始化 (全新直式模板尺寸設定)
+// 1. 設定與初始化
 // ==========================================
-// 🎯 這裡是你調整「兩格拍貼」位置、大小和旋轉角度的控制台！
+// ==========================================
+// 1. 設定與初始化
+// ==========================================
 const CLIP_POSITIONS = [
-    // 第一格 (上面的框框)
-    { 
-        x: 400,    // 左右位置 (數字越大越往右)
-        y: 790,    // 上下位置 (數字越大越往下)
-        w: 595,    // 錄影畫面的寬度
-        h: 336,    // 錄影畫面的高度
-        rotate: 8  // 旋轉角度 (正數為順時針)
-    }, 
-    // 第二格 (下面的框框)
-    { 
-        x: 350, 
-        y: 1160, 
-        w: 595, 
-        h: 336, 
-        rotate: 8 
-    }  
+    // 第一格：維持橫向比例
+    { x: 395, y: 795, w: 600, h: 340, rotate: 8 }, 
+    // 第二格：維持橫向比例
+    { x: 350, y: 1160, w: 600, h: 340, rotate: 8 }  
 ];
-
 const canvas = document.getElementById('resultCanvas');
 const ctx = canvas.getContext('2d', { alpha: false }); 
-const templateVideo = document.getElementById('template-video');;
+const templateVideo = document.getElementById('template-video');
+let userClips = [];
 
-// ==========================================
-// 2. 資料庫與「同步起跑」工具
-// ==========================================
 function getBlobFromDB(key) {
     return new Promise((resolve) => {
         const request = indexedDB.open("PhotoboothDB", 3);
@@ -98,33 +86,28 @@ function prepareVideo(videoEl, srcData) {
         videoEl.muted = true;
         videoEl.loop = true;
         videoEl.playsInline = true;
-        videoEl.autoplay = true; 
-
-        // 🚨 確保讀到真實畫面，解決模板變透明消失的問題
+        
         videoEl.onloadeddata = () => {
-            videoEl.pause(); 
+            videoEl.play().catch(e => console.log("播放被阻擋", e));
             resolve(videoEl);
         };
         
-        // 如果檔名打錯會跳警告
         videoEl.onerror = () => {
-            console.error("🚨 找不到模板影片！請檢查資料夾與檔名：", srcData);
+            console.error("🚨 找不到模板影片！請檢查路徑：", srcData);
             resolve(videoEl);
         };
 
         if (typeof srcData === 'string') {
             videoEl.src = srcData;
-        } else {
+        } else if (srcData instanceof Blob) {
             videoEl.src = URL.createObjectURL(srcData);
         }
         
-        setTimeout(() => resolve(videoEl), 5000); 
+        // 強制逾時保護
+        setTimeout(() => resolve(videoEl), 3000); 
     });
 }
 
-// ==========================================
-// 3. 核心：完美同步與合成畫面
-// ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const role = urlParams.get('role') || '淘氣女'; 
@@ -133,7 +116,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     qrContainer.innerHTML = '<span style="color:#aaa; font-size: 1rem; font-weight: bold;">準備影片中...</span>';
 
-    // 🎯 正確讀取你剛改好的檔名
+    // 🎯 畫質保證：先設定尺寸
+    canvas.width = 1080;
+    canvas.height = 1920;
+
     const pTemplate = prepareVideo(templateVideo, `photo/${role}_拍照模板.webm`);
     
     const pClip1 = getBlobFromDB('clip_1').then(blob => {
@@ -150,158 +136,104 @@ document.addEventListener('DOMContentLoaded', async () => {
         return prepareVideo(v, blob);
     });
 
-  // 🛑 等待「所有人」都抵達起跑線
     const [readyTemplate, readyClip1, readyClip2] = await Promise.all([pTemplate, pClip1, pClip2]);
-    const userClips = [readyClip1, readyClip2];
-
-    // 🎯 畫質保證：不再依賴影片載入狀態，強制給予 1080x1920 高清直式尺寸！
-    canvas.width = 1080;
-    canvas.height = 1920;
-
-    // 🛑 全部歸零，同時按下播放鍵
-    [templateVideo, readyClip1, readyClip2].forEach(v => {
-        if (v && v.videoWidth > 0) {
-            v.currentTime = 0; 
-            v.play().catch(e=>console.log(e));
-        }
-    });
+    userClips = [readyClip1, readyClip2].filter(v => v !== null);
 
     render(); 
-    startCanvasRecording();
+    startCanvasRecording(); 
 
-function render() {
-        if (templateVideo && templateVideo.paused) templateVideo.play().catch(e=>{});
-        userClips.forEach(v => {
-            if (v && v.paused && v.videoWidth > 0) v.play().catch(e=>{});
-        });
-
+    function render() {
         ctx.fillStyle = '#FFFFFF'; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
+        // 🚀 核心修復：確保影片在播放，且不因 videoWidth 為 0 而跳過
         userClips.forEach((v, index) => {
             const pos = CLIP_POSITIONS[index];
-            if (v && v.videoWidth > 0) {
+            if (v) {
+                // 如果影片暫停了，把它叫醒
+                if (v.paused) v.play().catch(()=>{});
                 try { drawVideo(ctx, v, pos.x, pos.y, pos.w, pos.h, pos.rotate); } catch(e) {}
             }
         });
         
-        try {
-            if (templateVideo && templateVideo.videoWidth > 0) {
-                ctx.drawImage(templateVideo, 0, 0, canvas.width, canvas.height);
-            }
-        } catch(e) {}
+        if (templateVideo) {
+            if (templateVideo.paused) templateVideo.play().catch(()=>{});
+            try { ctx.drawImage(templateVideo, 0, 0, canvas.width, canvas.height); } catch(e) {}
+        }
 
-        // ==========================================
-        // 🚀 新增：將使用者名字畫在模板的指定位置
-        // ==========================================
+       // 🎯 名字渲染 (進階版：支援大小、位置與旋轉)
         const userName = localStorage.getItem('user_name') || '玩家';
-        
         ctx.save();
+
+        // 💡 1. 在這裡調整「位置」
+        const textX = 300; // 左右 (數字越大越靠右)
+        const textY = 250; // 上下 (數字越大越靠下)
         
-        // 🎯 1. 座標定位 (X, Y)
-        // Canvas 的總大小是 1080 x 1920。
-        // 這裡是我預估的座標，如果名字太偏左就加大 X，太偏下就減小 Y
-        ctx.translate(260, 250); 
+        // 💡 2. 在這裡調整「旋轉角度」
+        const textAngle = -4; // 正數順時針，負數逆時針 (例如 -5 就是往左微傾斜)
+
+        // 💡 3. 在這裡調整「文字大小」與顏色
+        // 把 55px 改大或改小，就可以改變字體大小！
+        ctx.font = '400 40px "LINE Seed TW", sans-serif'; 
+        ctx.fillStyle = '#4A4A4A'; 
         
-        // 🎯 2. 傾斜角度 (配合模板紙張的斜度)
-        // 負數代表逆時針旋轉。這裡預估紙張大約傾斜了 -6 度
-        ctx.rotate(-6 * Math.PI / 180); 
-        
-        // 🎯 3. 設定字體、粗細、大小
-        ctx.font = "500 35px 'LINE Seed TW', sans-serif"; 
-        
-        // 🎯 4. 設定顏色 (使用你們品牌的深灰色)
-        ctx.fillStyle = "#4A4A4A"; 
-        
-        // 把文字畫出來
-        ctx.fillText(userName, 0, 0);
+        // 執行旋轉與寫字的魔法
+        ctx.translate(textX, textY);
+        ctx.rotate((textAngle * Math.PI) / 180);
+        ctx.fillText(userName, 0, 0); 
         
         ctx.restore();
-        // ==========================================
 
         requestAnimationFrame(render);
     }
 });
 
 function drawVideo(ctx, video, x, y, width, height, degrees) {
+    // 只有在真的有畫面時才畫，避免畫出黑塊
+    if (video.videoWidth === 0) return;
+
     ctx.save();
     ctx.translate(x + width/2, y + height/2);
     ctx.rotate(degrees * Math.PI / 180.0);
-    
     const ratio = video.videoWidth / video.videoHeight;
     const targetRatio = width / height;
     let sw, sh, sx, sy;
-
-    if (ratio > targetRatio) {
-        sh = video.videoHeight;
-        sw = sh * targetRatio;
-        sy = 0; sx = (video.videoWidth - sw) / 2;
-    } else {
-        sw = video.videoWidth;
-        sh = sw / targetRatio;
-        sx = 0; sy = (video.videoHeight - sh) / 2;
-    }
-    
-   
+    if (ratio > targetRatio) { sh = video.videoHeight; sw = sh * targetRatio; sy = 0; sx = (video.videoWidth - sw) / 2; } 
+    else { sw = video.videoWidth; sh = sw / targetRatio; sx = 0; sy = (video.videoHeight - sh) / 2; }
     ctx.drawImage(video, sx, sy, sw, sh, -width/2, -height/2, width, height);
     ctx.restore();
 }
 
-// ==========================================
-// 4. 錄製、上傳與產生 QR Code
-// ==========================================
 function startCanvasRecording() {
     const stream = canvas.captureStream(30);
-    const mimeType = 'video/webm';
-    const recorder = new MediaRecorder(stream, { mimeType: mimeType });
+    let options = { mimeType: 'video/webm;codecs=vp8', videoBitsPerSecond: 8000000 };
+    if (!MediaRecorder.isTypeSupported(options.mimeType)) options.mimeType = 'video/webm';
+    
+    const recorder = new MediaRecorder(stream, options);
     const chunks = [];
-    
     recorder.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
-    
     recorder.onstop = async () => {
-    const finalBlob = new Blob(chunks, { type: mimeType });
-    const qrContainer = document.getElementById('ui-qrcode');
-    
-    qrContainer.innerHTML = '<span style="color:#aaa; font-size: 1rem; font-weight: bold; text-align: center;">雲端轉檔中<br>請稍候約 3 秒...</span>';
-    
-    const cloudName = 'dz8vnxfts'; 
-    const uploadPreset = 'put your hands up';
-
-    const formData = new FormData();
-    formData.append('file', finalBlob);
-    formData.append('upload_preset', uploadPreset);
-
-    try {
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/video/upload`, {
-            method: 'POST',
-            body: formData
-        });
-        const result = await response.json();
+        const finalBlob = new Blob(chunks, { type: options.mimeType });
+        const qrContainer = document.getElementById('ui-qrcode');
+        qrContainer.innerHTML = '<span style="color:#aaa; font-size: 1rem; font-weight: bold; text-align: center;">雲端轉檔中...</span>';
         
-        if (result.secure_url) {
-            const mp4Url = result.secure_url
-                .replace('/upload/', '/upload/f_mp4,vc_h264,q_auto,w_720,ac_none/')
-                .replace('.webm', '.mp4');
-            
-            const githubUrl = 'https://hancaaaaai.github.io/putyourhandsup415'; 
-            const mobilePageUrl = `${githubUrl}/share.html?video=${encodeURIComponent(mp4Url)}`;
+        const formData = new FormData();
+        formData.append('file', finalBlob);
+        formData.append('upload_preset', 'put your hands up');
 
-            qrContainer.innerHTML = ''; 
-            new QRCode(qrContainer, {
-                text: mobilePageUrl,
-                width: 200, height: 200,
-                colorDark : "#3b3f44", colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.L 
-            });
-        } else {
-            qrContainer.innerHTML = '<span style="color:red;">上傳失敗</span>';
-        }
-    } catch (error) {
-        console.error("Cloudinary 上傳失敗：", error);
-        qrContainer.innerHTML = '<span style="color:red;">網路錯誤</span>';
-    }
-};
-    
+        try {
+            const response = await fetch(`https://api.cloudinary.com/v1_1/dz8vnxfts/video/upload`, { method: 'POST', body: formData });
+            const result = await response.json();
+            if (result.secure_url) {
+                const mp4Url = result.secure_url
+                    .replace('/upload/', '/upload/f_mp4,vc_h264,q_auto:best,w_1080,h_1920,c_fill,ac_none/')
+                    .replace('.webm', '.mp4');
+                const mobilePageUrl = `https://hancaaaaai.github.io/putyourhandsup415/share.html?video=${encodeURIComponent(mp4Url)}`;
+                qrContainer.innerHTML = ''; 
+                new QRCode(qrContainer, { text: mobilePageUrl, width: 200, height: 200 });
+            }
+        } catch (error) { console.error(error); qrContainer.innerHTML = '<span style="color:red;">網路錯誤</span>'; }
+    };
     recorder.start();
     setTimeout(() => { recorder.stop(); }, 11500); 
 }
