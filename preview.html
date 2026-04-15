@@ -45,6 +45,7 @@
 
     <div id="source-videos">
         <video id="template-video" loop muted playsinline crossorigin="anonymous"></video>
+        <video id="char-video" loop muted playsinline crossorigin="anonymous"></video>
     </div>
 
     <script>
@@ -59,6 +60,7 @@ const CLIP_POSITIONS = [
 const canvas = document.getElementById('resultCanvas');
 const ctx = canvas.getContext('2d', { alpha: false }); 
 const templateVideo = document.getElementById('template-video');
+const charVideo = document.getElementById('char-video'); // 🎯 抓取小人影片
 
 // ==========================================
 // 2. 資料庫與「同步起跑」工具
@@ -78,23 +80,18 @@ function getBlobFromDB(key) {
     });
 }
 
-// 🛑 修正：強迫瀏覽器乖乖下載影片的升級版
 function prepareVideo(videoEl, srcData) {
     return new Promise((resolve) => {
         videoEl.muted = true;
         videoEl.loop = true;
         videoEl.playsInline = true;
-        
-        // ⚠️ 關鍵：必須開啟 autoplay，瀏覽器才會真正去抓取畫面！
         videoEl.autoplay = true; 
 
-        // 當畫面成功載入「第一幀」時
         videoEl.onloadeddata = () => {
-            videoEl.pause(); // 立刻按暫停！等大家一起到齊再跑
+            videoEl.pause(); 
             resolve(videoEl);
         };
         
-        // 萬一壞檔，也不要卡死
         videoEl.onerror = () => resolve(videoEl); 
 
         if (typeof srcData === 'string') {
@@ -103,7 +100,6 @@ function prepareVideo(videoEl, srcData) {
             videoEl.src = URL.createObjectURL(srcData);
         }
         
-        // 3秒超時保護 (稍微拉長一點點確保載入)
         setTimeout(() => resolve(videoEl), 3000); 
     });
 }
@@ -119,8 +115,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     qrContainer.innerHTML = '<span style="color:#aaa; font-size: 1rem; font-weight: bold;">準備影片中...</span>';
 
-    // 🛑 同時平行載入這 3 支影片 (省下超多時間)
+    // 🎯 建立個性對應表，用來抓取教學影片
+    const ROLE_TO_CATEGORY = {
+        '淘氣':'外向活力','活潑':'外向活力','幽默':'外向活力','大方':'外向活力',
+        '冷靜':'內向安靜','文靜':'內向安靜','沉穩':'內向安靜','害羞':'內向安靜',
+        '溫柔':'關懷溫暖','善良':'關懷溫暖','耐心':'關懷溫暖','樂觀':'關懷溫暖',
+        '勇敢':'果斷堅強','自信':'果斷堅強','果斷':'果斷堅強','獨立':'果斷堅強',
+        '敏銳':'敏銳理性','細心':'敏銳理性','聰明':'敏銳理性','謹慎':'敏銳理性'
+    };
+    const trait = role.substring(0, 2);
+    const gender = role.substring(2, 3);
+    const category = ROLE_TO_CATEGORY[trait] || '外向活力';
+
+    // 🛑 同時平行載入這 4 支影片 (包含小人)
     const pTemplate = prepareVideo(templateVideo, `photo/${role}_拍照模板.webm`);
+    const pChar = prepareVideo(charVideo, `booth/${category}_${gender}.webm`); // 🎯 載入小人
     
     const pClip1 = getBlobFromDB('clip_1').then(blob => {
         if(!blob) return null;
@@ -137,22 +146,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // 🛑 等待「所有人」都抵達起跑線
-    const [readyTemplate, readyClip1, readyClip2] = await Promise.all([pTemplate, pClip1, pClip2]);
+    const [readyTemplate, readyClip1, readyClip2, readyChar] = await Promise.all([pTemplate, pClip1, pClip2, pChar]);
     const userClips = [readyClip1, readyClip2];
 
     // 設定畫布尺寸
     canvas.width = templateVideo.videoWidth || 1080;
     canvas.height = templateVideo.videoHeight || 1920;
 
-    // 🛑 重頭戲：全部歸零，同時按下播放鍵！(完美解決一開始沒模板的問題)
-    [templateVideo, readyClip1, readyClip2].forEach(v => {
+    // 🛑 全部歸零，同時按下播放鍵！
+    [templateVideo, readyClip1, readyClip2, readyChar].forEach(v => {
         if (v && v.videoWidth > 0) {
             v.currentTime = 0; 
             v.play().catch(e=>console.log(e));
         }
     });
 
-    // 開始畫圖與錄影
     render(); 
     startCanvasRecording(); 
 
@@ -166,6 +174,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 try { drawVideo(ctx, v, pos.x, pos.y, pos.w, pos.h, pos.rotate); } catch(e) {}
             }
         });
+
+        // 🎯 畫上教學小人 (放在使用者上方、透明模板下方)
+        if (readyChar && readyChar.videoWidth > 0) {
+            try { 
+                // ⚠️ 如果小人位置或大小不對，請直接改這四個數字！
+                const charW = 600;  // 寬度
+                const charH = 1000; // 高度
+                const charX = 50;   // X 座標 (左到右)
+                const charY = 850;  // Y 座標 (上到下)
+                
+                ctx.drawImage(readyChar, charX, charY, charW, charH); 
+            } catch(e) {}
+        }
         
         if (templateVideo.videoWidth > 0) {
             try { ctx.drawImage(templateVideo, 0, 0, canvas.width, canvas.height); } catch(e) {}
@@ -213,19 +234,16 @@ function startCanvasRecording() {
     const finalBlob = new Blob(chunks, { type: mimeType });
     const qrContainer = document.getElementById('ui-qrcode');
     
-    // 顯示上傳中狀態
     qrContainer.innerHTML = '<span style="color:#aaa; font-size: 1rem; font-weight: bold; text-align: center;">雲端生成中...</span>';
     
-    // 🚀 填入你自己的資料
-   const cloudName = 'dz8vnxfts'; 
-        const uploadPreset = 'put your hands up';
+    const cloudName = 'dz8vnxfts'; 
+    const uploadPreset = 'put your hands up';
 
     const formData = new FormData();
     formData.append('file', finalBlob);
     formData.append('upload_preset', uploadPreset);
 
     try {
-        // 1. 直接傳送到 Cloudinary 雲端
         const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/video/upload`, {
             method: 'POST',
             body: formData
@@ -233,15 +251,13 @@ function startCanvasRecording() {
         const result = await response.json();
         
         if (result.secure_url) {
-// 🌟 核心魔法終極版：強制轉 MP4 + H.264 編碼 + 寬度720 + 移除空音軌 (專治 iPhone 疑難雜症)
-const mp4Url = result.secure_url
-    .replace('/upload/', '/upload/f_mp4,vc_h264,q_auto,w_720,ac_none/')
-    .replace('.webm', '.mp4');
-            // 🚨 這裡填入你部署在 GitHub Pages 或 Vercel 的 share.html 完整網址
+            const mp4Url = result.secure_url
+                .replace('/upload/', '/upload/f_mp4,vc_h264,q_auto,w_720,ac_none/')
+                .replace('.webm', '.mp4');
+            
             const githubUrl = 'https://hancaaaaai.github.io/putyourhandsup415'; 
             const mobilePageUrl = `${githubUrl}/share.html?video=${encodeURIComponent(mp4Url)}`;
 
-            // 2. 生成 QR Code
             qrContainer.innerHTML = ''; 
             new QRCode(qrContainer, {
                 text: mobilePageUrl,
