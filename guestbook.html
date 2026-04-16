@@ -288,7 +288,7 @@
 
   let messages = JSON.parse(localStorage.getItem('guestbook_messages') || '[]');
 
-  function renderCrowd() {
+ function renderCrowd() {
     // 1. 重置所有格子的內容 (只保留標籤)
     document.querySelectorAll('.zone').forEach(z => {
       const label = z.querySelector('.zone-label');
@@ -296,8 +296,11 @@
       if(label) z.appendChild(label);
     });
 
+    // 🎯 效能救星 1：限制畫面最多只顯示「最新 50 筆」留言，防止 DOM 元素爆炸
+    const displayMessages = messages.slice(-50);
+
     // 2. 渲染每一個留言的小人
-    messages.forEach((msg, idx) => {
+    displayMessages.forEach((msg, idx) => {
       const fullRole = msg.role; // e.g. "淘氣女"
       const adjective = fullRole.replace(/[男女]$/, ''); // "淘氣"
       
@@ -322,12 +325,28 @@
 
       const videoSrc = `Quiz results page/${fullRole}.webm`;
 
+      // 🎯 效能救星 2：拿掉 autoplay，加上 preload="metadata"，讓瀏覽器預設只抓第一張畫面當圖片
       person.innerHTML = `
         <div class="bubble">${msg.text}</div>
         <div class="avatar-video-box">
-          <video src="${videoSrc}" autoplay loop muted playsinline></video>
+          <video src="${videoSrc}" loop muted playsinline preload="metadata" class="avatar-vid"></video>
         </div>
       `;
+      
+      // 🎯 效能救星 3：滑鼠移上去才播放影片，移開就暫停並回到第一幀
+      person.addEventListener('mouseenter', () => {
+        const vid = person.querySelector('video');
+        if (vid) vid.play().catch(e => console.log(e));
+      });
+      
+      person.addEventListener('mouseleave', () => {
+        const vid = person.querySelector('video');
+        if (vid) {
+          vid.pause();
+          vid.currentTime = 0; 
+        }
+      });
+
       container.appendChild(person);
     });
   }
