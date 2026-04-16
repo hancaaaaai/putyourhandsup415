@@ -444,17 +444,7 @@ const resVideo = document.getElementById('res-dynamic-video');
 window.addEventListener('scroll', () => {
     const windowHeight = window.innerHeight;
 
-    // --- 處理第一區域 (什麼是動字動字) ---
-    const section1 = document.getElementById('what-is-section');
-    if (section1) {
-        const rect1 = section1.getBoundingClientRect();
-        let scrollDistance1 = -rect1.top;
-        let totalScrollable1 = rect1.height - windowHeight;
-        let progress1 = scrollDistance1 / totalScrollable1;
-        progress1 = Math.max(0, Math.min(1, progress1));
-        section1.style.setProperty('--p', progress1);
-    }
-
+  
     // --- 處理第七區域 (台灣手語現況卡片展開) ---
     const section7 = document.getElementById('current-status-section');
     if (section7) {

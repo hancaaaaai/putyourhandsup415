@@ -1258,127 +1258,14 @@ html {
 
 .what-is-section {
     width: 100%;
-    height: 400vh; /* 維持 400vh 讓動態有空間跑 */
+    height: 100vh; /* 🎯 變更為 100vh (一個螢幕高) */
     background-image: url('JPG/什麼是動字動字_背景.jpg'); 
-    background-position: top center;
+    background-position: center center; /* 讓圖片保持正中 */
     background-repeat: no-repeat;
-    background-size: 100% auto; 
+    background-size: cover; /* 完美填滿螢幕 */
     position: relative;
 }
 
-.signs-wrapper {
-    position: sticky;
-    top: 0;
-    width: 100%;
-    height: 100vh; 
-    overflow: hidden; 
-}
-
-.sign-item {
-    position: absolute;
-    transform: translate(-50%, -50%); 
-    z-index: 10;
-}
-
-/* =========================================
-   🎯 標牌路徑自訂區 (你可以調整 start/end 數值)
-   ========================================= */
-
-/* 1. 三角形牌子：最先跑 (進度 0 ~ 0.5 跑完) */
-.sign-triangle {
-    /* 這裡定義進度變數 lp1 (Local Progress 1) */
-    --lp1: clamp(0, var(--p, 0) * 2, 1); 
-    
-    /* 左右：從 -30% 飛到 35% */
-    left: calc(-30% + (80.5% * var(--lp1))) !important; 
-    /* 上下：從 120vh 飛到 60vh (這裡你可以調整 top) */
-    top: calc(120vh - (60vh * var(--lp1))) !important;
-    
-    width: 180px !important; 
-}
-
-/* 2. 手牌子：中間跑 (進度 0.25 ~ 0.75 跑完) */
-.sign-hand {
-    /* lp2：扣掉 0.25 的延遲，並乘以 2 倍速 */
-    --lp2: clamp(0, (var(--p, 0) - 0.25) * 2, 1);
-    
-    /* 左右：從 130% 飛到 65% (右側飛入) */
-    left: calc(130% - (79% * var(--lp2))) !important;
-    /* 上下：從 120vh 飛到 65vh */
-    top: calc(120vh - (45vh * var(--lp2))) !important;
-    
-    width: 320px !important;
-}
-
-/* 3. 長方形牌子：最後跑 (進度 0.5 ~ 1.0 跑完) */
-.sign-rectangle {
-    /* lp3：扣掉 0.5 的延遲，並乘以 2 倍速 */
-    --lp3: clamp(0, (var(--p, 0) - 0.5) * 2, 1);
-    
-    /* 左右：從 -50% 飛到 50% */
-    left: calc(-50% + (100.5% * var(--lp3))) !important;
-    /* 上下：從 150vh 飛到 85vh (起始高度設 150 讓它飛更遠更斜) */
-    top: calc(150vh - (65vh * var(--lp3))) !important;
-    
-    width: 300px !important; 
-}
-
-/* 💡 標題文字：滑動時淡入 (如果你想改回自動，請配合 script.js 的 .active 寫法) */
-.what-is-title {
-    position: absolute;
-    top: 30%; left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: 'LINE Seed TW', sans-serif;
-    font-weight: 700;
-    font-size: 5rem;
-    color: #4A4A4A;
-    white-space: nowrap;
-    z-index: 5;
-    /* 根據總進度淡入 */
-    opacity: calc(var(--p, 0) * 4); 
-}
-/* =========================================
-   背景雲朵視差特效 (獨立運作，絕對不影響牌子)
-   ========================================= */
-
-.cloud-item {
-    position: absolute;
-    z-index: 1; /* 確保在牌子之下 */
-    pointer-events: none; /* 讓滑鼠可以穿透雲朵，不影響任何操作 */
-    
-    /* 🌟 雲朵視差核心公式：利用 --speed 決定移動幅度 */
-    transform: translate(-50%, calc(-50% + (var(--speed, -20vh) * var(--p, 0))));
-}
-
-/* 📌 雲朵 01：不改變原始圖片大小 (維持原尺寸) */
-.cloud-01 {
-    /* 這裡刻意不寫 width，讓它保持原圖的自然大小 */
-}
-
-/* 📌 雲朵 02：允許隨意改變大小的基礎設定 */
-.cloud-02 {
-    /* 可以在下方個別調整 width */
-}
-
-/* =========================================
-   個別雲朵設定 (位置、大小、飄動速度)
-   💡 --speed 為「負數」代表往下滾動時，雲會往上飄（產生背景較遠的錯覺）
-   ========================================= */
-
-/* A: 左上方的 01 雲 (🚨 加上 width，不讓它變巨無霸) */
-.cloud-a { left: 15%; top: 20vh; width: 450px; --speed: -30vh; } 
-
-/* B: 右上方的 02 雲 (20px 太小了，改成 250px) */
-.cloud-b { left: 85%; top: 30vh; width: 250px; --speed: -15vh; } 
-
-/* C: 左下方的 02 雲 (設定大一點 350px，飄非常快) */
-.cloud-c { left: 10%; top: 75vh; width: 350px; --speed: -45vh; } 
-
-/* D: 右下方的 02 雲 (改成 200px) */
-.cloud-d { left: 80%; top: 85vh; width: 200px; --speed: -25vh; }
-
-/* E: 畫面偏中間的 01 雲 (🚨 加上 width 限制) */
-.cloud-e { left: 30%; top: 120vh; width: 500px; --speed: -40vh; }
 
 /* =========================================
    讓手語成為日常的風景 (第四區域：全螢幕背景)

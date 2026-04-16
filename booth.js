@@ -490,12 +490,30 @@ document.addEventListener('keydown', (e) => {
     if (/^[a-zA-Z0-9]$/.test(e.key)) {
         cheatBuffer += e.key.toLowerCase();
         if (cheatBuffer.length > 10) cheatBuffer = cheatBuffer.slice(-10);
+        
+        // 🎯 密技 1：輸入 "skip" 跳過暖身偵測
         if (cheatBuffer.includes('skip')) {
             cheatBuffer = ""; 
             if (typeof uiUpdateInterval !== 'undefined' && uiUpdateInterval) clearInterval(uiUpdateInterval);
             if (typeof finishWarmup === 'function') finishWarmup();
             return;
         }
+
+        // 🎯 密技 2：輸入 "next" 直接跳轉到預覽頁面 (跳過所有錄影)
+        if (cheatBuffer.includes('next')) {
+            cheatBuffer = ""; 
+            console.log("🛠️ 測試模式觸發：直接跳轉至預覽畫面！");
+            let finalTitle = "淘氣女"; 
+            try {
+                const data = JSON.parse(localStorage.getItem('photobooth_template'));
+                if (data && data.role) finalTitle = data.role;
+            } catch(e) {}
+            // 直接換頁
+            window.location.href = `preview.html?role=${encodeURIComponent(finalTitle)}`;
+            return;
+        }
+
+        // 🎯 密技 3：輸入 g01~g20 或 b01~b20 切換角色
         const match = cheatBuffer.match(/([gb])(0[1-9]|1[0-9]|20)$/);
         if (match) {
             cheatBuffer = ""; 
@@ -507,5 +525,4 @@ document.addEventListener('keydown', (e) => {
         }
     }
 });
-
 window.addEventListener('DOMContentLoaded', () => { initAI(); });
