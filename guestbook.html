@@ -170,10 +170,7 @@
     display: flex; align-items: center; justify-content: center;
   }
 
-  #secret-btn {
-    position: fixed; top: 0; left: 0; width: 100px; height: 100px; z-index: 9999;
-    background: transparent; cursor: default; 
-  }
+ 
 
   /* --- 留言引導氣泡框 --- */
   .invite-bubble {
@@ -217,7 +214,7 @@
     <div class="plaza" id="plaza"></div>
   </div>
 
-  <div id="secret-btn" onclick="handleSecretClick()"></div>
+
 
   <div class="ui-layer">
     <div class="input-bar">
@@ -259,27 +256,6 @@
   });
 
   // ==========================================
-  // 2. 隱藏清空邏輯 (左上角連點 5 下清空所有留言)
-  // ==========================================
-  let secretClicks = 0;
-  let secretTimer = null;
-
-  function handleSecretClick() {
-    secretClicks++;
-    clearTimeout(secretTimer);
-    secretTimer = setTimeout(() => { secretClicks = 0; }, 500);
-
-    if(secretClicks >= 5) {
-      if(confirm('【管理員模式】\n\n確定要清空所有留言嗎？')) {
-        localStorage.removeItem('guestbook_messages');
-        alert('已清空');
-        location.reload();
-      }
-      secretClicks = 0;
-    }
-  }
-
-  // ==========================================
   // 3. 資料與渲染
   // ==========================================
   const myData = JSON.parse(localStorage.getItem('photobooth_template') || '{}');
@@ -297,7 +273,7 @@
     });
 
     // 🎯 效能救星 1：限制畫面最多只顯示「最新 50 筆」留言，防止 DOM 元素爆炸
-    const displayMessages = messages.slice(-50);
+  const displayMessages = messages;
 
     // 2. 渲染每一個留言的小人
     displayMessages.forEach((msg, idx) => {

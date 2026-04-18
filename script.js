@@ -755,87 +755,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-// ==========================================
-// 15. 第十一區域：圖標規範格線動畫 (包含滾輪控制影片)
-// ==========================================
-window.addEventListener('DOMContentLoaded', () => {
-    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
-        const specSection = document.getElementById('spec-section');
-        const gridLines = document.querySelectorAll('.grid-line');
-        const specDiagram = document.getElementById('spec-diagram');
-        const specWebm = document.getElementById('spec-webm'); 
 
-        if (specSection && gridLines.length > 0) {
-            
-            // ----------------------------------------
-            // 動畫 1：畫線與圖片淡入 (自動播放)
-            // ----------------------------------------
-            const tl = gsap.timeline({ paused: true });
-
-            tl.to(gridLines, {
-                strokeDashoffset: 0,
-                // 🎯 修改 1：將原本的 5 秒改成 1.5 秒，線就會畫得非常俐落快速！
-                duration: 1.5,   
-                stagger: 0.1,  // 這裡的 0.1 是每條線出發的間隔時間
-                ease: "power2.out"
-            });
-
-            if (specDiagram) {
-                // 讓方格圖在線畫完前 0.5 秒就開始淡入
-                tl.to(specDiagram, { opacity: 1, duration: 1, ease: "power2.inOut" }, "-=0.5");
-                tl.to(gridLines, { opacity: 0, duration: 1, ease: "power2.inOut" }, "<");
-            }
-
-            if (specWebm) {
-                tl.to(specWebm, { opacity: 1, duration: 1, ease: "power2.inOut" }, "<");
-            }
-
-            ScrollTrigger.create({
-                trigger: specSection,
-                start: "top 60%", 
-                onEnter: () => tl.play(),
-                onLeaveBack: () => tl.progress(0).pause()
-            });
-
-           // ----------------------------------------
-            // 動畫 2：畫面釘住與滾輪控制影片
-            // ----------------------------------------
-            if (specWebm) {
-                specWebm.load(); 
-
-                const setupVideoScrub = () => {
-                    let vidDuration = specWebm.duration || 1; 
-
-                    // 🎯 修改 2：我們把原本的單一動畫，變成一個 Timeline (時間軸)
-                    const scrubTl = gsap.timeline({
-                        scrollTrigger: {
-                            trigger: specSection,
-                            start: "top top",
-                            end: "+=200%", // 增加滾動長度，讓後面的滑動更有餘裕
-                            scrub: 0.5, 
-                            pin: true,
-                            fastScrollEnd: true,
-                            preventOverlaps: true
-                        }
-                    });
-
-                    // 🎯 魔法在這裡：
-                    // 我們塞入一個 duration: 0.5 的「空白動畫」當作緩衝。
-                    // 這樣當畫面剛釘住時，使用者前 20% 的滾動距離是「空轉」的，
-                    // 剛好讓影片有時間完全淡入。繼續往下滾，影片才會開始播放 (duration: 2)！
-                    scrubTl.to({}, { duration: 0.5 }) 
-                           .to(specWebm, { currentTime: vidDuration, duration: 2, ease: "none" });
-                };
-
-                if (specWebm.readyState >= 1) {
-                    setupVideoScrub();
-                } else {
-                    specWebm.addEventListener('loadedmetadata', setupVideoScrub);
-                }
-            }
-        }
-    }
-});
 // ==========================================
 // 預載第十二區的序列圖片，防止滑動時閃爍
 // ==========================================
@@ -1024,43 +944,38 @@ window.addEventListener('DOMContentLoaded', () => {
     const backBtn = document.getElementById('back-to-top-btn');
     const overviewSection = document.getElementById('icon-overview-section');
     const wrapper = document.getElementById('horizontal-track-wrapper');
-    const specSection = document.getElementById('spec-section');
+    
+    // 🎯 替換：改為抓取下一個區塊 (圖標規範細節)
+    const specDetailsSection = document.getElementById('spec-details-section');
 
     if (backBtn) {
-        // 用來記憶目前點擊按鈕該去哪裡：'home' (首頁) 或 'overview' (圖標總覽)
         let targetLocation = 'home';
 
         window.addEventListener('scroll', () => {
             const scrollY = window.scrollY;
             const windowHeight = window.innerHeight;
 
-            // 狀態 1：如果在最首頁 (滾動不到半個螢幕高) -> 隱藏按鈕
             if (scrollY < windowHeight * 0.5) {
                 backBtn.classList.add('hidden');
                 return; 
             }
 
-            if (wrapper && overviewSection && specSection) {
+            // 🎯 替換判斷條件
+            if (wrapper && overviewSection && specDetailsSection) {
                 const spacer = wrapper.closest('.pin-spacer') || wrapper;
                 const wrapperTop = spacer.getBoundingClientRect().top + scrollY;
-
-                // 算好的圖標總覽完美定位點 (跟導覽列跳轉的公式一樣)
                 const overviewTargetY = wrapperTop + (windowHeight * 3);
                 
-                // 圖標規範區塊的開頭
-                const specTop = specSection.getBoundingClientRect().top + scrollY;
+                // 🎯 替換為新區塊的頂部位置
+                const specTop = specDetailsSection.getBoundingClientRect().top + scrollY;
 
-                // 狀態 2：正在「圖標總覽」區塊內觀看時 -> 隱藏按鈕
-                // (給它上下各半個螢幕的緩衝區)
                 if (scrollY > overviewTargetY - (windowHeight * 0.5) && scrollY < specTop - (windowHeight * 0.5)) {
                     backBtn.classList.add('hidden');
                 }
-                // 狀態 3：已經滾過圖標總覽，進入「圖標規範區塊」 -> 顯示按鈕，且目標設為總覽
                 else if (scrollY >= specTop - (windowHeight * 0.5)) {
                     backBtn.classList.remove('hidden');
                     targetLocation = 'overview';
                 }
-                // 狀態 4：在首頁與圖標總覽之間的區域 -> 顯示按鈕，且目標設為首頁
                 else {
                     backBtn.classList.remove('hidden');
                     targetLocation = 'home';
@@ -1068,15 +983,11 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // 綁定點擊事件
         backBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            
             if (targetLocation === 'home') {
-                // 平滑滾動到最上方
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else if (targetLocation === 'overview') {
-                // 平滑滾動到圖標總覽的完美定位點
                 if (wrapper) {
                     const spacer = wrapper.closest('.pin-spacer') || wrapper;
                     const wrapperTop = spacer.getBoundingClientRect().top + window.scrollY;
